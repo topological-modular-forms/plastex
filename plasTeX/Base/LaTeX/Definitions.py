@@ -86,15 +86,16 @@ class newtheorem(Command):
         if attrs['*modifier*']:
             newclass = type(str(name), (Environment,),
                     {'caption': caption, 'nodeName': 'thmenv', 'thmName': name,
-                        'args': '[title:str]'})
+                     'args': '[title:str]', 'blockType': True})
         else:
             newclass = type(str(name), (Environment,),
                     {'caption': caption, 'nodeName': 'thmenv', 'thmName': name,
-                        'counter': counter, 'args': '[title:str]'})
+                     'counter': counter, 'args': '[title:str]', 'blockType': True})
         self.ownerDocument.context.addGlobal(name, newclass)
 
 
 class proof(Environment):
+    blockType = True
     args ='[caption]'
 
     def digest(self, tokens):
