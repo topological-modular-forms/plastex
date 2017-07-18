@@ -12,6 +12,7 @@ How to test this (for now):
 import os, re
 import plasTeX
 from plasTeX.Renderers.PageTemplate import Renderer as _Renderer
+from plasTeX.Renderers import Renderable
 
 log = plasTeX.Logging.getLogger()
 
@@ -30,43 +31,12 @@ for line in content:
   labels[label] = tag
 
 
-# Support for Jinja2 templates
-try:
-  from jinja2 import Environment, contextfunction
-except ImportError:
-  def jinja2template(s, encoding='utf8'):
-    def renderjinja2(obj):
-      return s
-    return renderjinja2
-else:
-  try:
-    import ipdb as pdb
-  except ImportError:
-    import pdb
+class GerbyRenderable(Renderable):
+    def __str__(self):
+        if hasattr(self, 'id') and not self.id.startswith('a0'):
+            log.info("%s has tag %s", self.id, labels[self.id])
+        return Renderable.__str__(self)
 
-  @contextfunction
-  def debug(context):
-    pdb.set_trace()
-
-  def gerbyJinja2(s, encoding='utf8'):
-    env = Environment(trim_blocks=True, lstrip_blocks=True)
-    env.globals['debug'] = debug
-
-    def renderjinja2(obj, s=s):
-      tvars = {'here':obj,
-               'obj':obj,
-               'container':obj.parentNode,
-               'config':obj.ownerDocument.config,
-               'context':obj.ownerDocument.context,
-               'templates':obj.renderer}
-
-      if obj.id[0:2] != "a0":
-        log.info("%s has tag %s", obj.id, labels[obj.id])
-
-      tpl = env.from_string(s)
-      return tpl.render(tvars)
-
-    return renderjinja2
 
 class Gerby(_Renderer):
   """ Tag-aware renderer for HTML documents """
@@ -74,6 +44,7 @@ class Gerby(_Renderer):
   fileExtension = '.html'
   imageTypes = ['.png','.jpg','.jpeg','.gif']
   vectorImageTypes = ['.svg']
+  renderableClass = GerbyRenderable
 
   def loadTemplates(self, document):
     """Load templates as in PageTemplate but also look for packages that
@@ -83,8 +54,6 @@ class Gerby(_Renderer):
       import jinja2
     except ImportError:
       log.error('Jinja2 is not available, hence the HTML5 renderer cannot be used.')
-
-    self.registerEngine('jinja2', None, '.jinja2', gerbyJinja2)
 
     _Renderer.loadTemplates(self, document)
     rendererdata = document.rendererdata['html5'] = dict()
