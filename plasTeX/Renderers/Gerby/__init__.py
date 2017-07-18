@@ -103,9 +103,23 @@ class Gerby(_Renderer):
   def processFileContent(self, document, s):
     s = _Renderer.processFileContent(self, document, s)
 
-    return s
-
-Renderer = Gerby
     # remove empty paragraphs
     s = re.compile(r'<p>\s*</p>', re.I).sub(r'', s)
 
+    return s
+
+  def render(self, document):
+    # we decorate all DOM elements with labels that appear in the tags file
+    def decorateTags(node):
+      if node.nodeType == plasTeX.Macro.ELEMENT_NODE and node.id[0:2] != "a0":
+        # plasTeX.Packages.hyperref parses hypertargets, but we ignore them
+        if node.nodeName != "hypertarget":
+          node.tag = labels[node.id]
+
+      for child in node.childNodes: decorateTags(child)
+
+    decorateTags(document)
+
+    _Renderer.render(self, document)
+
+Renderer = Gerby

@@ -1,5 +1,5 @@
 name: thmenv
-<article class="env-{{ obj.thmName }}" id="{{ obj.id }}">
+<article class="env-{{ obj.thmName }}" id="{{ obj.tag }}">
   {% if obj.title %}
     <p><a href="#"><span class="environment-identifier">{{ obj.thmName|capitalize }} {{ obj.ref }} ({{ obj.title }})</a>
   {% else %}
