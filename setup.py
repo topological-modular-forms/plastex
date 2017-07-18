@@ -25,6 +25,9 @@ setup(name="plasTeX",
          'plasTeX.Imagers',
          'plasTeX.Packages',
          'plasTeX.Renderers',
+
+         'plasTeX.Renderers.Gerby',
+
          'plasTeX.Renderers.XHTML',
          'plasTeX.Renderers.XHTML.Themes',
          'plasTeX.Renderers.XHTML.Themes.default',
@@ -61,6 +64,9 @@ setup(name="plasTeX",
          'plasTeX.Renderers.DocBook.Themes.default': templates,
          'plasTeX.Renderers.DocBook.Themes.book': templates,
          'plasTeX.Renderers.DocBook.Themes.article': templates,
+
+         'plasTeX.Renderers.Gerby': templates,
+
          'plasTeX.Renderers.XHTML': templates,
          'plasTeX.Renderers.XHTML.Themes.default': templates,
          'plasTeX.Renderers.XHTML.Themes.default.icons': images,

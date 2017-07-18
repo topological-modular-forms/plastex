@@ -1,0 +1,22 @@
+name: thmenv
+<article class="env-{{ obj.thmName }}" id="{{ obj.id }}">
+  {% if obj.title %}
+    <p><a href="#"><span class="environment-identifier">{{ obj.thmName|capitalize }} {{ obj.ref }} ({{ obj.title }})</a>
+  {% else %}
+    <p><a href="#"><span class="environment-identifier">{{ obj.thmName|capitalize }} {{ obj.ref }}</a>
+  {% endif %}
+  </a>
+
+  {{ obj }}
+</article>
+
+name: proof
+<article class="env-proof">
+  {% if obj.caption %}
+    <p><strong>{{ obj.caption }}</strong>
+  {% else %}
+    <p><strong>Proof.</strong>
+  {% endif %}
+
+  {{ obj }}
+</article>
