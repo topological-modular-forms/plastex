@@ -5,18 +5,16 @@ name: thmenv
   {% else %}
     <p><a href="#"><span class="environment-identifier">{{ obj.thmName|capitalize }} {{ obj.ref }}</a>
   {% endif %}
-  </a>
-
   {{ obj }}
 </article>
 
 name: proof
 <article class="env-proof">
   {% if obj.caption %}
-    <p><strong>{{ obj.caption }}</strong>
+    <p><strong>{{ obj.caption }}</strong></p>
   {% else %}
-    <p><strong>Proof.</strong>
+    <p><strong>Proof.</strong></p>
   {% endif %}
-
   {{ obj }}
 </article>
+{# FIXME impossible to drop leading <p> of {{ obj }}, needs to be fixed in CSS #}

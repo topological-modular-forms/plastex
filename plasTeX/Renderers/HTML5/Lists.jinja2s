@@ -1,3 +1,4 @@
+{# TODO need support for labelled list items! #}
 name: itemize
 <ul class="itemize">
 {% for item in obj %}

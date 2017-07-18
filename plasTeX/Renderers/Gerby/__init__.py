@@ -106,3 +106,6 @@ class Gerby(_Renderer):
     return s
 
 Renderer = Gerby
+    # remove empty paragraphs
+    s = re.compile(r'<p>\s*</p>', re.I).sub(r'', s)
+
