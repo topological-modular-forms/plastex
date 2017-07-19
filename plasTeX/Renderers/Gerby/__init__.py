@@ -17,25 +17,25 @@ from plasTeX.Renderers import Renderable
 log = plasTeX.Logging.getLogger()
 
 # TODO move this to something more reasonable like obj.ownerDocument
-with open("tags") as f:
-  content = f.readlines()
-
-tags = dict()
-labels = dict()
-
-for line in content:
-  if line[0] == "#": continue
-
-  (tag, label) = line.rstrip().split(",")
-  tags[tag] = label
-  labels[label] = tag
 
 
 class GerbyRenderable(Renderable):
   def __str__(self):
     if hasattr(self, "id") and not self.id.startswith("a0"):
-      log.info("%s has tag %s", self.id, labels[self.id])
+      log.info("%s has tag %s", self.id, self.ownerDocument.userdata["labels"][self.id])
     return Renderable.__str__(self)
+
+  @property
+  def filenameoverride(self):
+    # handle tags
+    if hasattr(self, "tag"):
+      return self.thmName + "-" + self.tag + "-" + self.id
+
+    # handle proofs
+    if self.nodeName == "proof":
+      pass
+
+    raise AttributeError
 
 
 class Gerby(_Renderer):
@@ -45,6 +45,21 @@ class Gerby(_Renderer):
   imageTypes = ['.png','.jpg','.jpeg','.gif']
   vectorImageTypes = ['.svg']
   renderableClass = GerbyRenderable
+
+  def loadTags(self, document):
+    """Read the tags file and construct the tags and labels dictionary"""
+    with open(document.userdata["working-dir"] + "/" + document.config["gerby"]["tags"]) as f:
+      content = f.readlines()
+
+    document.userdata["tags"] = dict()
+    document.userdata["labels"] = dict()
+
+    for line in content:
+      if line[0] == "#": continue
+
+      (tag, label) = line.rstrip().split(",")
+      document.userdata["tags"][tag] = label
+      document.userdata["labels"][label] = tag
 
   def loadTemplates(self, document):
     """Load templates as in PageTemplate but also look for packages that
@@ -56,7 +71,7 @@ class Gerby(_Renderer):
       log.error('Jinja2 is not available, hence the HTML5 renderer cannot be used.')
 
     _Renderer.loadTemplates(self, document)
-    rendererdata = document.rendererdata['html5'] = dict()
+    rendererdata = document.rendererdata["gerby"] = dict()
     config = document.config
 
     rendererDir = os.path.dirname(__file__)
@@ -78,12 +93,14 @@ class Gerby(_Renderer):
     return s
 
   def render(self, document):
+    self.loadTags(document)
+
     # we decorate all DOM elements with labels that appear in the tags file
     def decorateTags(node):
       if node.nodeType == plasTeX.Macro.ELEMENT_NODE and node.id[0:2] != "a0":
         # plasTeX.Packages.hyperref parses hypertargets, but we ignore them
         if node.nodeName != "hypertarget":
-          node.tag = labels[node.id]
+          node.tag = document.userdata["labels"][node.id]
 
       for child in node.childNodes: decorateTags(child)
 
