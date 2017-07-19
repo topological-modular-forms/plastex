@@ -32,10 +32,10 @@ for line in content:
 
 
 class GerbyRenderable(Renderable):
-    def __str__(self):
-        if hasattr(self, 'id') and not self.id.startswith('a0'):
-            log.info("%s has tag %s", self.id, labels[self.id])
-        return Renderable.__str__(self)
+  def __str__(self):
+    if hasattr(self, "id") and not self.id.startswith("a0"):
+      log.info("%s has tag %s", self.id, labels[self.id])
+    return Renderable.__str__(self)
 
 
 class Gerby(_Renderer):
