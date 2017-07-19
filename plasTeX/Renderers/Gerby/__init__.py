@@ -29,7 +29,11 @@ class GerbyRenderable(Renderable):
   def filenameoverride(self):
     # handle tags
     if hasattr(self, "tag"):
-      return self.thmName + "-" + self.tag + "-" + self.id
+      environment = self.nodeName
+      if self.nodeName == "thmenv":
+        environment = self.thmName
+
+      return environment + "-" + self.ref + "-" + self.tag + "-" + self.id
 
     # handle proofs
     if self.nodeName == "proof":
