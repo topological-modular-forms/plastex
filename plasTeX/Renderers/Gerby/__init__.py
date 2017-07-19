@@ -18,11 +18,21 @@ log = plasTeX.Logging.getLogger()
 
 # TODO move this to something more reasonable like obj.ownerDocument
 
+def searchTheorem(node):
+  if node.nodeName == "thmenv":
+    return node.id
+
+  if node.previousSibling is not None:
+    return searchTheorem(node.previousSibling)
+  else:
+    # assumes that proofs are not at the start
+    return searchTheorem(node.parentNode.previousSibling.lastChild) # TODO is this guaranteed to work?
+
 
 class GerbyRenderable(Renderable):
   def __str__(self):
-    if hasattr(self, "id") and not self.id.startswith("a0"):
-      log.info("%s has tag %s", self.id, self.ownerDocument.userdata["labels"][self.id])
+    #if hasattr(self, "id") and not self.id.startswith("a0"):
+    #  log.info("%s has tag %s", self.id, self.ownerDocument.userdata["labels"][self.id])
     return Renderable.__str__(self)
 
   @property
@@ -37,7 +47,23 @@ class GerbyRenderable(Renderable):
 
     # handle proofs
     if self.nodeName == "proof":
-      pass
+      log.info("HANDLING A PROOF")
+      # if the title contains a \ref, use that as a label
+      if self.attributes["caption"] is not None:
+        log.info(self.attributes["caption"]) # TODO this fails, because it is already parsed...
+
+
+      # otherwise use the closest theorem-like environment before the proof
+      label = searchTheorem(self)
+
+      if label in self.ownerDocument.userdata["labels"]:
+        # increment the proof counter to ensure unique filename
+        tag = self.ownerDocument.userdata["labels"][label]
+        self.ownerDocument.userdata["proofs"][tag] += 1
+
+        return "proof-" + self.ownerDocument.userdata["labels"][label] + "-" + str(self.ownerDocument.userdata["proofs"][tag])
+
+      return None
 
     raise AttributeError
 
@@ -57,6 +83,7 @@ class Gerby(_Renderer):
 
     document.userdata["tags"] = dict()
     document.userdata["labels"] = dict()
+    document.userdata["proofs"] = dict()
 
     for line in content:
       if line[0] == "#": continue
@@ -64,6 +91,7 @@ class Gerby(_Renderer):
       (tag, label) = line.rstrip().split(",")
       document.userdata["tags"][tag] = label
       document.userdata["labels"][label] = tag
+      document.userdata["proofs"][tag] = 0
 
   def loadTemplates(self, document):
     """Load templates as in PageTemplate but also look for packages that
