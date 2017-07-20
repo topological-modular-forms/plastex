@@ -18,22 +18,24 @@ log = plasTeX.Logging.getLogger()
 
 # TODO move this to something more reasonable like obj.ownerDocument
 
-def searchTheorem(node):
-  if node.nodeName == "thmenv":
-    return node.id
-
-  if node.previousSibling is not None:
-    return searchTheorem(node.previousSibling)
-  else:
-    # assumes that proofs are not at the start
-    return searchTheorem(node.parentNode.previousSibling.lastChild) # TODO is this guaranteed to work?
-
 
 class GerbyRenderable(Renderable):
   def __str__(self):
     #if hasattr(self, "id") and not self.id.startswith("a0"):
     #  log.info("%s has tag %s", self.id, self.ownerDocument.userdata["labels"][self.id])
     return Renderable.__str__(self)
+
+  @staticmethod
+  def searchTheorem(node):
+    if node.nodeName == "thmenv":
+      return node.id
+
+    if node.previousSibling is not None:
+      return GerbyRenderable.searchTheorem(node.previousSibling)
+    else:
+      # assumes that proofs are not at the start
+      return GerbyRenderable.searchTheorem(node.parentNode.previousSibling.lastChild) # TODO is this guaranteed to work?
+
 
   @property
   def filenameoverride(self):
@@ -47,14 +49,13 @@ class GerbyRenderable(Renderable):
 
     # handle proofs
     if self.nodeName == "proof":
-      log.info("HANDLING A PROOF")
       # if the title contains a \ref, use that as a label
       if self.attributes["caption"] is not None:
         log.info(self.attributes["caption"]) # TODO this fails, because it is already parsed...
 
 
       # otherwise use the closest theorem-like environment before the proof
-      label = searchTheorem(self)
+      label = GerbyRenderable.searchTheorem(self)
 
       if label in self.ownerDocument.userdata["labels"]:
         # increment the proof counter to ensure unique filename
