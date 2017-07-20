@@ -20,11 +20,6 @@ log = plasTeX.Logging.getLogger()
 
 
 class GerbyRenderable(Renderable):
-  def __str__(self):
-    #if hasattr(self, "id") and not self.id.startswith("a0"):
-    #  log.info("%s has tag %s", self.id, self.ownerDocument.userdata["labels"][self.id])
-    return Renderable.__str__(self)
-
   @staticmethod
   def searchTheorem(node):
     if node.nodeName == "thmenv":
@@ -72,7 +67,7 @@ class GerbyRenderable(Renderable):
 class Gerby(_Renderer):
   """ Tag-aware renderer for HTML documents """
 
-  fileExtension = '.html'
+  fileExtension = ''
   imageTypes = ['.png','.jpg','.jpeg','.gif']
   vectorImageTypes = ['.svg']
   renderableClass = GerbyRenderable
