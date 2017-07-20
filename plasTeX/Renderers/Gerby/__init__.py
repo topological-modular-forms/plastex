@@ -129,11 +129,16 @@ class Gerby(_Renderer):
     self.loadTags(document)
 
     # we decorate all DOM elements with labels that appear in the tags file
+    # we also decorate the elements that need to be propagated in the output
     def decorateTags(node):
       if node.nodeType == plasTeX.Macro.ELEMENT_NODE and node.id[0:2] != "a0":
         # plasTeX.Packages.hyperref parses hypertargets, but we ignore them
         if node.nodeName != "hypertarget":
           node.tag = document.userdata["labels"][node.id]
+          node.userdata["propagate"] = True
+
+      if node.nodeName == "proof":
+        node.userdata["propagate"] = True
 
       for child in node.childNodes: decorateTags(child)
 
