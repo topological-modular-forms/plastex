@@ -40,12 +40,12 @@ class GerbyRenderable(Renderable):
   @property
   def filenameoverride(self):
     # handle tags
-    if hasattr(self, "tag"):
+    if "tag" in self.userdata:
       environment = self.nodeName
       if self.nodeName == "thmenv":
         environment = self.thmName
 
-      return environment + "-" + self.ref + "-" + self.tag + "-" + self.id
+      return environment + "-" + self.ref + "-" + self.userdata["tag"] + "-" + self.id
 
     # handle proofs
     if self.nodeName == "proof":
@@ -134,7 +134,7 @@ class Gerby(_Renderer):
       if node.nodeType == plasTeX.Macro.ELEMENT_NODE and node.id[0:2] != "a0":
         # plasTeX.Packages.hyperref parses hypertargets, but we ignore them
         if node.nodeName != "hypertarget":
-          node.tag = document.userdata["labels"][node.id]
+          node.userdata["tag"] = document.userdata["labels"][node.id]
           node.userdata["propagate"] = True
 
       if node.nodeName == "proof":
