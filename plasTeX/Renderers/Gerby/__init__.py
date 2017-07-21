@@ -13,25 +13,26 @@ import os, re
 import plasTeX
 from plasTeX.Renderers.PageTemplate import Renderer as _Renderer
 from plasTeX.Renderers import Renderable
+from plasTeX.DOM import Node
 
 log = plasTeX.Logging.getLogger()
 
-# TODO move this to something more reasonable like obj.ownerDocument
+# give the closest theorem environment to this proof
+def searchTheorem(linear, proof):
+  # last visited node
+  last = None
+
+  for current in linear:
+    # iterate over the theorems
+    if current.nodeName == "thmenv":
+      last = current
+
+    # if the proof matches, then return the last visited theorem node
+    if current.isSameNode(proof):
+      return last.id
 
 
 class GerbyRenderable(Renderable):
-  @staticmethod
-  def searchTheorem(node):
-    if node.nodeName == "thmenv":
-      return node.id
-
-    if node.previousSibling is not None:
-      return GerbyRenderable.searchTheorem(node.previousSibling)
-    else:
-      # assumes that proofs are not at the start
-      return GerbyRenderable.searchTheorem(node.parentNode.previousSibling.lastChild) # TODO is this guaranteed to work?
-
-
   @property
   def filenameoverride(self):
     # handle tags
@@ -44,24 +45,71 @@ class GerbyRenderable(Renderable):
 
     # handle proofs
     if self.nodeName == "proof":
-      # if the title contains a \ref, use that as a label
-      if self.attributes["caption"] is not None:
-        log.info(self.attributes["caption"]) # TODO this fails, because it is already parsed...
-
-
-      # otherwise use the closest theorem-like environment before the proof
-      label = GerbyRenderable.searchTheorem(self)
+      # caption can contain a \ref
+      if self.attributes["caption"] and len(self.attributes["caption"].getElementsByTagName("ref")) > 0:
+        # use the first one for now, in theory there could be more
+        label = [ref.attributes["label"] for ref in self.attributes["caption"].getElementsByTagName("ref")][0]
+      # just take the closest theorem
+      else:
+        label = searchTheorem(self.ownerDocument.userdata["linear"], self)
 
       if label in self.ownerDocument.userdata["labels"]:
-        # increment the proof counter to ensure unique filename
         tag = self.ownerDocument.userdata["labels"][label]
         self.ownerDocument.userdata["proofs"][tag] += 1
-
-        return "proof-" + self.ownerDocument.userdata["labels"][label] + "-" + str(self.ownerDocument.userdata["proofs"][tag])
-
-      return None
+        return "proof-" + tag + "-" + str(self.ownerDocument.userdata["proofs"][tag])
 
     raise AttributeError
+
+
+"""Helper functors for Gerby"""
+
+def decorateTags(node, labels):
+  """Recursively decorate labeled nodes with Gerby-specific userdata"""
+  if node.nodeType == plasTeX.Macro.ELEMENT_NODE and node.id[0:2] != "a0":
+    # plasTeX.Packages.hyperref parses hypertargets, but we ignore them
+    if node.nodeName != "hypertarget" and node.id in labels:
+      node.userdata["tag"] = labels[node.id]
+      node.userdata["propagate"] = True
+
+  if node.nodeName == "proof":
+    node.userdata["propagate"] = True
+
+  for child in node.childNodes:
+    decorateTags(child, labels)
+
+def loadTags(document):
+  """Read the tags file and construct the tags and labels dictionary"""
+  with open(document.userdata["working-dir"] + "/" + document.config["gerby"]["tags"]) as f:
+    content = f.readlines()
+
+  document.userdata["tags"] = dict()   # tag to label
+  document.userdata["labels"] = dict() # label to tag
+  document.userdata["proofs"] = dict() # count number of proofs for a tag
+
+  for line in content:
+    if line[0] == "#": continue
+
+    (tag, label) = line.rstrip().split(",")
+    document.userdata["tags"][tag] = label
+    document.userdata["labels"][label] = tag
+    document.userdata["proofs"][tag] = 0
+
+def linearRepresentation(document):
+  """Make a linear representation of the document containing theorems and proofs"""
+  document.userdata["linear"] = list()
+  stack = list()
+
+  stack.extend(document.childNodes)
+
+  while len(stack) > 0:
+    node = stack.pop()
+
+    if node.nodeName in ["thmenv", "proof"]:
+      document.userdata["linear"].append(node)
+
+    stack.extend(node.childNodes)
+
+  document.userdata["linear"] = list(reversed(document.userdata["linear"])) # TODO figure out why this is necessary
 
 
 class Gerby(_Renderer):
@@ -71,23 +119,6 @@ class Gerby(_Renderer):
   imageTypes = ['.png','.jpg','.jpeg','.gif']
   vectorImageTypes = ['.svg']
   renderableClass = GerbyRenderable
-
-  def loadTags(self, document):
-    """Read the tags file and construct the tags and labels dictionary"""
-    with open(document.userdata["working-dir"] + "/" + document.config["gerby"]["tags"]) as f:
-      content = f.readlines()
-
-    document.userdata["tags"] = dict()
-    document.userdata["labels"] = dict()
-    document.userdata["proofs"] = dict()
-
-    for line in content:
-      if line[0] == "#": continue
-
-      (tag, label) = line.rstrip().split(",")
-      document.userdata["tags"][tag] = label
-      document.userdata["labels"][label] = tag
-      document.userdata["proofs"][tag] = 0
 
   def loadTemplates(self, document):
     """Load templates as in PageTemplate but also look for packages that
@@ -107,7 +138,6 @@ class Gerby(_Renderer):
     srcDir = document.userdata['working-dir']
     buildDir = os.getcwd()
 
-
   def cleanup(self, document, files, postProcess=None):
     res = _Renderer.cleanup(self, document, files, postProcess=postProcess)
     return res
@@ -121,23 +151,14 @@ class Gerby(_Renderer):
     return s
 
   def render(self, document):
-    self.loadTags(document)
+    # create the tags and labels dictionaries in the document
+    loadTags(document)
 
     # we decorate all DOM elements with labels that appear in the tags file
-    # we also decorate the elements that need to be propagated in the output
-    def decorateTags(node):
-      if node.nodeType == plasTeX.Macro.ELEMENT_NODE and node.id[0:2] != "a0":
-        # plasTeX.Packages.hyperref parses hypertargets, but we ignore them
-        if node.nodeName != "hypertarget":
-          node.userdata["tag"] = document.userdata["labels"][node.id]
-          node.userdata["propagate"] = True
+    decorateTags(document, document.userdata["labels"])
 
-      if node.nodeName == "proof":
-        node.userdata["propagate"] = True
-
-      for child in node.childNodes: decorateTags(child)
-
-    decorateTags(document)
+    # create a linearised version of the document containing theorems and proofs in order
+    linearRepresentation(document)
 
     _Renderer.render(self, document)
 
