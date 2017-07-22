@@ -1,2 +1,5 @@
+name: bf
+<strong>{{ obj }}</strong>
+
 name: it
 <em>{{ obj }}</em>

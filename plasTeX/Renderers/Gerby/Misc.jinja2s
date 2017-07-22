@@ -9,4 +9,4 @@ name: tableofcontents input @vobeyspaces @noligs def protect let \
       medskip smallskip parindent indent setlength settowidth addtolength \
       nopagebreak newwrite newcounter typeout sloppypar hfil thispagestyle vfill \
       hypertarget newenvironment reversemarginpar phantomsection \
-      vskip pagestyle centerline hyperref marginnote
+      vskip pagestyle centerline hyperref marginnote normalmarginpar
