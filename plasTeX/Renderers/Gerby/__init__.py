@@ -17,8 +17,9 @@ from plasTeX.DOM import Node
 
 log = plasTeX.Logging.getLogger()
 
-# give the closest theorem environment to this proof
-def searchTheorem(linear, proof):
+
+# give the closest theorem environment to a node
+def searchPrecedingTheorem(linear, node):
   # last visited node
   last = None
 
@@ -27,8 +28,8 @@ def searchTheorem(linear, proof):
     if current.nodeName == "thmenv":
       last = current
 
-    # if the proof matches, then return the last visited theorem node
-    if current.isSameNode(proof):
+    # if the node matches, then return the last visited theorem node
+    if current.isSameNode(node):
       return last.id
 
 
@@ -45,18 +46,32 @@ class GerbyRenderable(Renderable):
 
     # handle proofs
     if self.nodeName == "proof":
+      # TODO this is a workaround for a weird bug
+      if "caption" not in self.attributes:
+        raise AttributeError
+
       # caption can contain a \ref
       if self.attributes["caption"] and len(self.attributes["caption"].getElementsByTagName("ref")) > 0:
         # use the first one for now, in theory there could be more
         label = [ref.attributes["label"] for ref in self.attributes["caption"].getElementsByTagName("ref")][0]
       # just take the closest theorem
       else:
-        label = searchTheorem(self.ownerDocument.userdata["linear"], self)
+        label = searchPrecedingTheorem(self.ownerDocument.userdata["linear"], self)
 
       if label in self.ownerDocument.userdata["labels"]:
         tag = self.ownerDocument.userdata["labels"][label]
         self.ownerDocument.userdata["proofs"][tag] += 1
-        return "proof-" + tag + "-" + str(self.ownerDocument.userdata["proofs"][tag])
+        return tag + "-" + str(self.ownerDocument.userdata["proofs"][tag]) + ".proof"
+
+    # handle slogans
+    if self.nodeName == "slogan":
+      # TODO requires to remove the \newenvironment so that plasTeX actually sees it
+      # TODO is it possible to give a bogus optional argument to the comment environment to keep track of the type in TeX?
+      label = searchPrecedingTheorem(self.ownerDocument.userdata["linear"], self)
+
+      if label in self.ownerDocument.userdata["labels"]:
+        tag = self.ownerDocument.userdata["labels"][label]
+        return tag + ".slogan"
 
     raise AttributeError
 
@@ -104,7 +119,7 @@ def linearRepresentation(document):
   while len(stack) > 0:
     node = stack.pop()
 
-    if node.nodeName in ["thmenv", "proof"]:
+    if node.nodeName in ["thmenv", "proof", "slogan"]:
       document.userdata["linear"].append(node)
 
     stack.extend(node.childNodes)
