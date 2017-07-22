@@ -8,7 +8,7 @@ name: section
 {{ obj }}
 
 
-name: section
+name: subsection
 <h3 id="{{ obj.id }}" class="tex-{{ obj.nodeName }}">{{ obj.fullTitle }}</h3>
 {{ obj }}
 
