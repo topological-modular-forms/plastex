@@ -133,6 +133,9 @@ class Gerby(_Renderer):
     rendererdata = document.rendererdata["gerby"] = dict()
     config = document.config
 
+    # split-level must always be -2 to not create any clutter files
+    config["files"]["split-level"] = -2
+
     rendererDir = os.path.dirname(__file__)
 
     srcDir = document.userdata['working-dir']
