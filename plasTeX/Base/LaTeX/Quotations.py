@@ -9,7 +9,7 @@ from plasTeX import Command, Environment
 from plasTeX.Logging import getLogger
 
 
-class quote(Environment): 
+class quote(Environment):
     blockType = True
 
 class quotation(Environment):
@@ -17,3 +17,7 @@ class quotation(Environment):
 
 class verse(Environment):
     blockType = True
+
+# TODO figure out why putting this in plasTeX.Renderers.Gerby causes things to malfunction
+class slogan(Environment):
+  blockType = True
