@@ -41,7 +41,7 @@ class GerbyRenderable(Renderable):
       if self.nodeName == "thmenv":
         environment = self.thmName
 
-      return environment + "-" + self.ref + "-" + self.userdata["tag"] + "-" + self.id
+      return environment + "-" + self.ref + "-" + self.userdata["tag"] + "-" + self.id + ".tag"
 
     # handle proofs
     if self.nodeName == "proof":
