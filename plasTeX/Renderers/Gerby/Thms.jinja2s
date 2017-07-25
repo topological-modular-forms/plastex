@@ -1,9 +1,9 @@
 name: thmenv
 <article class="env-{{ obj.thmName }}" id="{{ obj.userdata['tag'] }}">
   {% if obj.title %}
-    <p><a href="/tag/{{ obj.userdata['tag'] }}"><span class="environment-identifier">{{ obj.thmName|capitalize }} {{ obj.ref }} ({{ obj.title }})</a>
+    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }} <span class="named">({{ obj.title }})</span></a>
   {% else %}
-    <p><a href="/tag/{{ obj.userdata['tag'] }}"><span class="environment-identifier">{{ obj.thmName|capitalize }} {{ obj.ref }}</a>
+    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }}</a>
   {% endif %}
   {{ obj }}
 </article>
@@ -15,6 +15,12 @@ name: proof
   {% else %}
     <p><strong>Proof.</strong></p>
   {% endif %}
-  {{ obj }}
+  {% if obj.blockType %}
+    {{ obj }}
+  {% else %}
+    <p>{{ obj }}</p>
+  {% endif %}
+  <p class="qed">$\square$</p>
 </article>
 {# FIXME impossible to drop leading <p> of {{ obj }}, needs to be fixed in CSS #}
+{# FIXME if obj is just a single paragraph, there are no <p>'s: the rendering works out fine though, for now #}

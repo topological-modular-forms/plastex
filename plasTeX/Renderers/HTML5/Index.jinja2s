@@ -35,7 +35,7 @@ name: theindex printindex
 {% endif %}
 
 name: index
-<a name="{{ obj.id }}" id="{{ obj.id}}"></a>
+{#<a name="{{ obj.id }}" id="{{ obj.id}}"></a>#}
 
 name: see seealso
 <i>{{ obj.captionName }}</i>{{ obj }}

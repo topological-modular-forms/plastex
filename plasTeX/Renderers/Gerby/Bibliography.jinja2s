@@ -1,9 +1,6 @@
 name: cite
 <span class="cite">
-[
-{% for item in obj.attributes['bibkeys'] %}
-  <a href="/bibliography/{{ item }}">{{ item }}</a>
-{% endfor %}
-]
+[{% for item in obj.attributes['bibkeys'] %}<a href="/bibliography/{{ item }}">{{ item }}</a>{% endfor %}]
 </span>
+{# TODO probably needs to handle commas in an intelligent way #}
 

@@ -1,4 +1,4 @@
 name: ref
-<a href="/tag/{{ here.idref.label.userdata['tag'] }}">{{ here.idref.label.tagName|capitalize }} {{ here.idref.label.ref }}</a>
+<a href="/tag/{{ here.idref.label.userdata['tag'] }}">{{ here.idref.label.ref }}</a>
 
 name: label

@@ -90,6 +90,10 @@ def decorateTags(node, labels):
     node.userdata["propagate"] = True
 
   for child in node.childNodes:
+    # make sure that there is always a paragraph in a proof
+    if not all([child.nodeName == "par" for child in node.childNodes]):
+      node.paragraphs()
+
     decorateTags(child, labels)
 
 def loadTags(document):
