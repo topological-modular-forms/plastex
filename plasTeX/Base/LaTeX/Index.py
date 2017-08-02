@@ -83,7 +83,7 @@ class IndexUtils(object):
         batches = []
         current = ''
         for item in self:
-            try: 
+            try:
                 label = title = unidecode(item.sortkey[0]).upper()
                 if title in encoding.stringletters():
                     pass
@@ -272,7 +272,8 @@ class glossary(Command):
     args = 'entry:nox'
 
 class index(Command):
-    args = 'entry:nox'
+    # Jacob Lurie has a mysterious hack to pretend it has multind
+    args = 'index entry:nox'
 
     @property
     def textContent(self):
