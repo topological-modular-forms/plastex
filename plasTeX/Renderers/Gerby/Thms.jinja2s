@@ -1,9 +1,9 @@
 name: thmenv
 <article class="env-{{ obj.thmName }}" id="{{ obj.userdata['tag'] }}">
   {% if obj.title %}
-    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }} <span class="named">({{ obj.title }})</span></a>
+    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }} <span class="named">({{ obj.title }})</span>.</a>
   {% else %}
-    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }}</a>
+    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }}.</a>
   {% endif %}
   {{ obj }}
 </article>
@@ -11,15 +11,11 @@ name: thmenv
 name: proof
 <article class="env-proof">
   {% if obj.caption %}
-    <p><strong>{{ obj.caption }}</strong></p>
+    <p><strong>{{ obj.caption }}.</strong></p>
   {% else %}
     <p><strong>Proof.</strong></p>
   {% endif %}
-  {% if obj.blockType %}
-    {{ obj }}
-  {% else %}
-    <p>{{ obj }}</p>
-  {% endif %}
+  {{ obj }}
   <p class="qed">$\square$</p>
 </article>
 {# FIXME impossible to drop leading <p> of {{ obj }}, needs to be fixed in CSS #}
