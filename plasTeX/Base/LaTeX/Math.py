@@ -148,8 +148,8 @@ class eqnarray(EqnarrayStar):
             return res
         res[1].ref = self.ref
         return res
-class nonumber(Command):
 
+class nonumber(Command):
     def invoke(self, tex):
         self.ownerDocument.context.counters['equation'].addtocounter(-1)
 
@@ -630,6 +630,9 @@ class stackrel(MathAccent):
 # Type Style
 
 class mathrm(Command):
+    args = 'self'
+
+class mathop(Command):
     args = 'self'
 
 class mathit(Command):
