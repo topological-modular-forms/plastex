@@ -58,7 +58,7 @@ setup(name="plasTeX",
          'plasTeX.Renderers.S5.Themes.default.ui.default',
       ],
       package_data = {
-         'plasTeX': ['*.xml'],
+         'plasTeX': ['*.xml', 'plasTeXrc'],
          'plasTeX.Base.LaTeX': ['*.xml','*.txt'],
          'plasTeX.Renderers.DocBook': templates,
          'plasTeX.Renderers.DocBook.Themes.default': templates,

@@ -86,11 +86,11 @@ class newtheorem(Command):
         if attrs['*modifier*']:
             newclass = type(str(name), (Environment,),
                     {'caption': caption, 'nodeName': 'thmenv', 'thmName': name,
-                     'args': '[title:str]', 'blockType': True})
+                        'args': '[title]'})
         else:
             newclass = type(str(name), (Environment,),
                     {'caption': caption, 'nodeName': 'thmenv', 'thmName': name,
-                     'counter': counter, 'args': '[title:str]', 'blockType': True})
+                        'counter': counter, 'args': '[title]'})
         self.ownerDocument.context.addGlobal(name, newclass)
 
 
