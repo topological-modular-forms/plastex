@@ -17,5 +17,5 @@ name: description
 </dl>
 
 name: item
-<li>{{ obj }}</li>
+<li {% if obj.attributes['term'] %}class="custom-item" data-marker="{{ obj.attributes['term'] }}"{% endif %}>{{ obj }}</li>
 {# TODO handle labels, tags #}
