@@ -184,13 +184,14 @@ class Gerby(_Renderer):
 
     _Renderer.render(self, document)
 
-    # write footnotes
-    mixin(Node, Gerby.renderableClass)
-    Node.renderer = self
-    for footnote in document.userdata["footnotes"]:
-      with open("{0}.footnote".format(footnote.id),"w") as f:
-        f.write(str(footnote))
-    del Node.renderer
-    unmix(Node, Gerby.renderableClass)
+    # write footnotes if there are any
+    if "footnotes" in document.userdata:
+      mixin(Node, Gerby.renderableClass)
+      Node.renderer = self
+      for footnote in document.userdata["footnotes"]:
+        with open("{0}.footnote".format(footnote.id),"w") as f:
+          f.write(str(footnote))
+      del Node.renderer
+      unmix(Node, Gerby.renderableClass)
 
 Renderer = Gerby
