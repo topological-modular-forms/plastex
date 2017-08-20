@@ -1,21 +1,18 @@
-name: math
+name: math DeclareMathOperator
 {{ obj.source }}
 
 name: ensuremath eqnarray eqnarray* align align* gather gather* flalign flalign* \
-      multline multline* alignat alignat* split DeclareMathOperator
-<span>{{ obj.source }}</span>
-
-name: displaymath equation* 
-<div class="displaymath" id="{{ obj.id }}">
+      multline multline* alignat alignat* split displaymath equation*
+<div class="equation">
   {{ obj.source }}
 </div>
 
 name: equation
-<div class="equation" id="{{ obj.id }}">
-<p>
-  <span class="equation_label">{{ obj.ref }}</span>
-  <div class="equation_content">
-    {{ obj.source }}
-  </div>
-</p>
+<div class="equation" {% if obj.userdata['tag'] %}id="{{ obj.userdata['tag'] }}"{% endif %}>
+  {% if obj.userdata['tag'] %}
+    <span class="equation-label"><a href="/tag/{{ obj.userdata['tag'] }}">{{ obj.ref }}</a></span>
+  {% else %}
+    <span class="equation-label">{{ obj.ref }}</span>
+  {% endif %}
+  <div>{{ obj.source }}</div>
 </div>
