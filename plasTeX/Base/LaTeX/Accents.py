@@ -21,12 +21,16 @@ class Accent(Command):
     def str(self):
         return type(self).chars.get(self.textContent.strip(), None)
 
-    @property    
+    @property
+    def source(self):
+        return type(self).chars.get(self.textContent.strip(), None)
+
+    @property
     def textContent(self):
         """
-        We need a customized textContent that doesn't look up 
+        We need a customized textContent that doesn't look up
         textContent recursively.
-        
+
         """
         output = []
         for item in self:
