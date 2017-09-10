@@ -824,7 +824,7 @@ class TeXDocument(Document):
 
     def addPackageResource(self, resource):
         """
-        Adds a pacakge resource or a list of package resources to 
+        Adds a pacakge resource or a list of package resources to
         self.packageResources.
         """
         if isinstance(resource, list):
@@ -935,6 +935,25 @@ class NoCharSubEnvironment(Environment):
         elif self.macroMode == Macro.MODE_END:
             doc.charsubs = self.charsubs
         super(NoCharSubEnvironment, self).invoke(tex)
+
+class NoCharSubCommand(Command):
+    """
+    A subclass of Command which prevents character substituton inside within
+    arguments of the command.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.charsubs = []
+        super(NoCharSubCommand, self).__init__(*args, **kwargs)
+
+    def preArgument(self, arg, tex):
+        self.charsubs = self.ownerDocument.charsubs
+        self.ownerDocument.charsubs = []
+        super(NoCharSubCommand, self).preArgument(arg, tex)
+
+    def postArgument(self, arg, value, tex):
+        self.ownerDocument.charsubs = self.charsubs
+        super(NoCharSubCommand, self).postArgument(arg, value, tex)
 
 class IgnoreCommand(Command):
     """

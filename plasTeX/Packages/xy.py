@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from plasTeX import Command, Environment
+from plasTeX import NoCharSubCommand, Command
 
-class xymatrix(Command):
+class xymatrix(NoCharSubCommand):
   args = 'str'
 
   class EndRow(Command):
