@@ -176,6 +176,10 @@ class Gerby(_Renderer):
     # create the tags and labels dictionaries in the document
     loadTags(document)
 
+    outputTree(document)
+
+    #import ipdb; ipdb.set_trace()
+
     # we decorate all DOM elements with labels that appear in the tags file
     decorateTags(document, document.userdata["labels"])
 
@@ -195,3 +199,15 @@ class Gerby(_Renderer):
       unmix(Node, Gerby.renderableClass)
 
 Renderer = Gerby
+
+
+def outputTree(node, depth=0):
+  if hasattr(node, "id") and node.id[0:2] != "a0":
+    print("-" * depth + node.nodeName + ": " + node.id + ", level = " + str(depth))
+  elif node.nodeName == "index":
+    print("*" * depth + node.nodeName)
+  else:
+    print("-" * depth + node.nodeName)
+
+  for child in node.childNodes:
+    outputTree(child, depth + 1)
