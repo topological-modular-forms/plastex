@@ -9,6 +9,14 @@ class xymatrix(NoCharSubCommand):
     """ End of a row """
     macroName = '\\'
 
+  class ar(Command):
+    pass
+
+  class omit(Command):
+    @property
+    def source(self):
+      return '\omit'
+
   def preArgument(self, arg, tex):
       # Check whether there are any spacing arguments for xymatrix
       self.spacingArgs = []
