@@ -84,7 +84,9 @@ def decorateTags(node, labels):
     # plasTeX.Packages.hyperref parses hypertargets, but we ignore them
     if node.nodeName != "hypertarget" and node.id in labels:
       node.userdata["tag"] = labels[node.id]
-      node.userdata["propagate"] = True
+
+      if node.nodeName not in ["part", "chapter", "section", "subsection", "subsubsection"]:
+        node.userdata["propagate"] = True
 
   if node.nodeName == "proof":
     node.userdata["propagate"] = True
