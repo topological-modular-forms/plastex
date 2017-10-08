@@ -1,9 +1,9 @@
 name: thmenv
 <article class="env-{{ obj.thmName }}" id="{{ obj.userdata['tag'] }}">
   {% if obj.title %}
-    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }} <span class="named">({{ obj.title }})</span>.</a>
+    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span> <span class="named">({{ obj.title }})</span>.</a>
   {% else %}
-    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} {{ obj.ref }}.</a>
+    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span>.</a>
   {% endif %}
   {{ obj }}
 </article>

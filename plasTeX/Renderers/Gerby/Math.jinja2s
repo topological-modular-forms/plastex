@@ -10,7 +10,7 @@ name: ensuremath eqnarray eqnarray* align align* gather gather* flalign flalign*
 name: equation
 <div class="equation" {% if obj.userdata['tag'] %}id="{{ obj.userdata['tag'] }}"{% endif %}>
   {% if obj.userdata['tag'] %}
-    <span class="equation-label"><a href="/tag/{{ obj.userdata['tag'] }}">{{ obj.ref }}</a></span>
+    <span class="equation-label"><a href="/tag/{{ obj.userdata['tag'] }}" data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</a></span>
   {% else %}
     <span class="equation-label">{{ obj.ref }}</span>
   {% endif %}
