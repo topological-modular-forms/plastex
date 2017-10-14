@@ -132,6 +132,20 @@ def linearRepresentation(document):
 
   document.userdata["linear"] = list(reversed(document.userdata["linear"])) # TODO figure out why this is necessary
 
+def checkLabels(document):
+  stack = list()
+  stack.extend(document.childNodes)
+
+  while len(stack) > 0:
+    node = stack.pop()
+
+    if node.nodeName in ["thmenv", "chapter", "section", "subsection", "subsubsection"]:
+      if node.id[0:3] == "a00" and hasattr(node.ref, "source"):
+        print("%s %s does not have a label" % (node.thmName if node.nodeName == "thmenv" else node.nodeName, node.ref.source))
+
+    stack.extend(node.childNodes)
+
+
 
 class Gerby(_Renderer):
   """ Tag-aware renderer for HTML documents """
@@ -178,9 +192,10 @@ class Gerby(_Renderer):
     # create the tags and labels dictionaries in the document
     loadTags(document)
 
-    outputTree(document)
+    #outputTree(document)
 
-    #import ipdb; ipdb.set_trace()
+    # validity check
+    checkLabels(document)
 
     # we decorate all DOM elements with labels that appear in the tags file
     decorateTags(document, document.userdata["labels"])
