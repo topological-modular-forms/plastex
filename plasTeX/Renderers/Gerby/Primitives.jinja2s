@@ -1,11 +1,13 @@
-name: par 
+name: par
 {% if obj.blockType %}
 {{ obj }}
 {% else %}
-<p>{{ obj }}</p>
+<p>
+{{ obj }}
+</p>
 {% endif %}
 
-name: active::^ 
+name: active::^
 <sup>{{ obj }}</sup>
 
 name: active::_
