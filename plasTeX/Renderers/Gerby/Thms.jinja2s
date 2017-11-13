@@ -10,13 +10,19 @@ name: thmenv
 
 name: proof
 <article class="env-proof">
-  {% if obj.caption %}
-    <p><strong>{{ obj.caption }}.</strong></p>
-  {% else %}
-    <p><strong>Proof.</strong></p>
-  {% endif %}
-  {{ obj }}
-  <p class="qed">$\square$</p>
+  {% for par in obj %}
+    <p>
+    {% if loop.first %}
+      {% if obj.caption %}
+      <strong>{{ obj.caption }}.</strong>
+      {% else %}
+      <strong>Proof.</strong>
+      {% endif %}
+    {% endif %}
+      {{ par }}
+    {% if loop.last %}
+      <span class="qed">$\square$</span>
+    </p>
+    {% endif %}
+  {% endfor %}
 </article>
-{# FIXME impossible to drop leading <p> of {{ obj }}, needs to be fixed in CSS #}
-{# FIXME if obj is just a single paragraph, there are no <p>'s: the rendering works out fine though, for now #}
