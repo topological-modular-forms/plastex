@@ -279,6 +279,7 @@ class index(Command):
     def textContent(self):
         return ''
 
+"""
     def invoke(self, tex):
         result = Command.invoke(self, tex)
         sortkey, key, format = [], [], []
@@ -355,6 +356,7 @@ class index(Command):
         userdata['index'].append(IndexEntry(key, self, sortkey, format, type))
 
         return result
+"""
 
 
 
