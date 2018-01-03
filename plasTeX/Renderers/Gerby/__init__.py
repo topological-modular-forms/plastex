@@ -14,6 +14,7 @@ import plasTeX
 from plasTeX.Renderers.PageTemplate import Renderer as _Renderer
 from plasTeX.Renderers import Renderable, mixin, unmix
 from plasTeX.DOM import Node
+import json
 
 log = plasTeX.Logging.getLogger()
 
@@ -132,6 +133,28 @@ def linearRepresentation(document):
 
   document.userdata["linear"] = list(reversed(document.userdata["linear"])) # TODO figure out why this is necessary
 
+def partsList(document):
+  """Make an association between parts and chapters"""
+  parts = dict()
+  stack = list()
+
+  stack.extend(document.childNodes)
+  current = None
+
+  while len(stack) > 0:
+    node = stack.pop()
+
+    if node.nodeName == "part":
+      current = node.ref.source
+      parts[current] = list()
+    elif node.nodeName == "chapter":
+      parts[current].append(node.ref.source)
+
+    stack.extend(node.childNodes)
+
+  return parts
+
+
 def checkLabels(document):
   stack = list()
   stack.extend(document.childNodes)
@@ -202,6 +225,11 @@ class Gerby(_Renderer):
 
     # create a linearised version of the document containing theorems and proofs in order
     linearRepresentation(document)
+
+    # associate parts to chapters
+    parts = partsList(document)
+    with open("parts.json", "w") as f:
+      json.dump(parts, f)
 
     _Renderer.render(self, document)
 
