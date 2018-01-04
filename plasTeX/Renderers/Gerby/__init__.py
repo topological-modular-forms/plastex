@@ -147,7 +147,7 @@ def partsList(document):
     if node.nodeName == "part":
       current = node.ref.source
       parts[current] = list()
-    elif node.nodeName == "chapter":
+    elif node.nodeName == "chapter" and current != None:
       parts[current].append(node.ref.source)
 
     stack.extend(node.childNodes)
