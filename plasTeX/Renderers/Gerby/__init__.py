@@ -68,7 +68,8 @@ class GerbyRenderable(Renderable):
     if self.nodeName in ["history", "slogan"]:
       # TODO requires to remove the \newenvironment so that plasTeX actually sees it
       # TODO is it possible to give a bogus optional argument to the comment environment to keep track of the type in TeX?
-      label = searchPrecedingTheorem(self.ownerDocument.userdata["linear"], self)
+      label = self.parentNode.id
+      import ipdb; ipdb.set_trace()
 
       if label in self.ownerDocument.userdata["labels"]:
         tag = self.ownerDocument.userdata["labels"][label]
