@@ -9,7 +9,7 @@ How to test this (for now):
   3) run plastex --renderer=Gerby book.tex in tags/tmp
 """
 
-import os, re
+import os, re, shutil
 import plasTeX
 from plasTeX.Renderers.PageTemplate import Renderer as _Renderer
 from plasTeX.Renderers import Renderable, mixin, unmix
@@ -69,7 +69,6 @@ class GerbyRenderable(Renderable):
       # TODO requires to remove the \newenvironment so that plasTeX actually sees it
       # TODO is it possible to give a bogus optional argument to the comment environment to keep track of the type in TeX?
       label = self.parentNode.id
-      import ipdb; ipdb.set_trace()
 
       if label in self.ownerDocument.userdata["labels"]:
         tag = self.ownerDocument.userdata["labels"][label]
@@ -155,6 +154,22 @@ def partsList(document):
 
   return parts
 
+def copyBibliographies(document):
+  """Copy bibliography files by looking for bibliography elements"""
+  stack = list()
+
+  stack.extend(document.childNodes)
+
+  while len(stack) > 0:
+    node = stack.pop()
+
+    if node.nodeName == "bibliography":
+      files = node.attributes["files"].split(",")
+      for f in files:
+        shutil.copyfile(document.userdata["working-dir"] + "/" + f + ".bib", f + ".bib")
+
+    stack.extend(node.childNodes)
+
 
 def checkLabels(document):
   stack = list()
@@ -216,7 +231,7 @@ class Gerby(_Renderer):
     # create the tags and labels dictionaries in the document
     loadTags(document)
 
-    #outputTree(document)
+    copyBibliographies(document)
 
     # validity check
     checkLabels(document)
