@@ -65,7 +65,7 @@ class GerbyRenderable(Renderable):
         return tag + "-" + str(self.ownerDocument.userdata["proofs"][tag]) + ".proof"
 
     # handle slogans, history, ...
-    if self.nodeName in ["history", "slogan"]:
+    if self.nodeName in ["history", "slogan", "reference"]:
       # TODO requires to remove the \newenvironment so that plasTeX actually sees it
       # TODO is it possible to give a bogus optional argument to the comment environment to keep track of the type in TeX?
       label = self.parentNode.id
