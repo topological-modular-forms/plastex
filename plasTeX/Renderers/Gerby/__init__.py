@@ -126,7 +126,7 @@ def linearRepresentation(document):
   while len(stack) > 0:
     node = stack.pop()
 
-    if node.nodeName in ["thmenv", "proof", "slogan"]:
+    if node.nodeName in ["thmenv", "proof", "reference", "history", "slogan"]:
       document.userdata["linear"].append(node)
 
     stack.extend(node.childNodes)

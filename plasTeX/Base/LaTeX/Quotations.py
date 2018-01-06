@@ -24,3 +24,6 @@ class slogan(Environment):
 
 class history(Environment):
   blockType = True
+
+class reference(Environment):
+  blockType = True
