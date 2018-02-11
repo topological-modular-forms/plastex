@@ -5,11 +5,11 @@ C.6.4 Verbatim
 
 """
 
-from plasTeX import Macro, Environment, Command, sourceArguments, sourceChildren
+from plasTeX import Macro, Environment, NoCharSubEnvironment, Command, sourceArguments, sourceChildren
 from plasTeX.Base.TeX.Text import bgroup, egroup
 from plasTeX.Tokenizer import Other
 
-class verbatim(Environment):
+class verbatim(NoCharSubEnvironment):
     blockType = True
     captionable = True
 
