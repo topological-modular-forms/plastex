@@ -1,11 +1,17 @@
 name: thmenv
 <article class="env-{{ obj.thmName }}" id="{{ obj.userdata['tag'] }}">
-  {% if obj.title %}
-    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span> <span class="named">({{ obj.title }})</span>.</a>
-  {% else %}
-    <p><a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span>.</a>
-  {% endif %}
-  {{ obj }}
+  {% for par in obj %}
+    <p>
+    {% if loop.first %}
+      {% if obj.title %}
+    <a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span> <span class="named">({{ obj.title }})</span>.</a>
+      {% else %}
+    <a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.thmName|capitalize }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span>.</a>
+      {% endif %}
+    {% endif %}
+    {{ par }}
+    </p>
+  {% endfor %}
 </article>
 
 name: proof
