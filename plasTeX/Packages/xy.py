@@ -52,3 +52,6 @@ class xymatrixH(xymatrix):
 
 class xymatrixL(xymatrix):
   macroName = "xymatrix@L"
+
+class xymatrix1(xymatrix):
+  macroName = "xymatrix@1"
