@@ -33,6 +33,16 @@ def searchPrecedingTheorem(linear, node):
     if current.isSameNode(node):
       return last.id
 
+def willItBeWhitespace(node):
+  if node.isElementContentWhitespace:
+  # Spaces, newlines, and comments are whitespace known to plasTeX
+    return True
+  elif node.nodeName in ["label","reference"]:
+  # labels and references are currently assumed to be whitespace
+    return True
+  elif node.nodeName == "par":
+  # A paragraph is whitespace if all it contains is whitespace
+    return all([willItBeWhitespace(child) for child in node.childNodes])
 
 class GerbyRenderable(Renderable):
   @property
@@ -42,6 +52,10 @@ class GerbyRenderable(Renderable):
       environment = self.nodeName
       if self.nodeName == "thmenv":
         environment = self.thmName
+
+        # decide whether or not paragraphs are whitespace
+        for child in self.childNodes:
+          child.isItWhitespace = willItBeWhitespace(child)
 
       return environment + "-" + self.ref + "-" + self.userdata["tag"] + "-" + self.id + ".tag"
 
@@ -68,7 +82,14 @@ class GerbyRenderable(Renderable):
     if self.nodeName in ["history", "slogan", "reference"]:
       # TODO requires to remove the \newenvironment so that plasTeX actually sees it
       # TODO is it possible to give a bogus optional argument to the comment environment to keep track of the type in TeX?
-      label = self.parentNode.id
+
+      # Reach top level environment containing this node.
+      # ASSUMPTION: The only other node type possibly containing this node is
+      #             a paragraph node.
+      parentEnv = self.parentNode
+      while parentEnv.nodeName == "par":
+        parentEnv = parentEnv.parentNode
+      label = parentEnv.id
 
       if label in self.ownerDocument.userdata["labels"]:
         tag = self.ownerDocument.userdata["labels"][label]
