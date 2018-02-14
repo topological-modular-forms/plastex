@@ -11,7 +11,6 @@ from plasTeX import Command, Environment, IgnoreCommand, encoding
 from plasTeX.Logging import getLogger
 from plasTeX.Base.LaTeX.Sectioning import SectionUtils
 
-import pdb
 log = getLogger()
 
 try:
@@ -26,7 +25,6 @@ except ImportError:
     log.warning('Cannot find unidecode lib. Expect issues with index sorting')
     def unidecode(s):
         return s
-
 
 class hyperpage(IgnoreCommand):
     args = 'page:nox'
