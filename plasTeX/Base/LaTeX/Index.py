@@ -11,6 +11,7 @@ from plasTeX import Command, Environment, IgnoreCommand, encoding
 from plasTeX.Logging import getLogger
 from plasTeX.Base.LaTeX.Sectioning import SectionUtils
 
+import pdb
 log = getLogger()
 
 try:
@@ -26,7 +27,7 @@ except ImportError:
     def unidecode(s):
         return s
 
-    
+
 class hyperpage(IgnoreCommand):
     args = 'page:nox'
 
@@ -272,8 +273,7 @@ class glossary(Command):
     args = 'entry:nox'
 
 class index(Command):
-    # Jacob Lurie has a mysterious hack to pretend it has multind
-    args = 'index entry:nox'
+    args = 'entry:nox'
 
     @property
     def textContent(self):
