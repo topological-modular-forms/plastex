@@ -16,6 +16,8 @@ from plasTeX.Renderers import Renderable, mixin, unmix
 from plasTeX.DOM import Node
 import json
 
+
+import pdb
 log = plasTeX.Logging.getLogger()
 
 
@@ -148,8 +150,8 @@ def linearRepresentation(document):
       document.userdata["linear"].append(node)
 
     stack.extend(node.childNodes)
-
-  document.userdata["linear"] = list(reversed(document.userdata["linear"])) # TODO figure out why this is necessary
+  pdb.set_trace()
+  document.userdata["linear"] = list(reversed(document.userdata["linear"]))
 
 def partsList(document):
   """Make an association between parts and chapters"""
