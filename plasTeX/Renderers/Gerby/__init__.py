@@ -80,9 +80,6 @@ class GerbyRenderable(Renderable):
 
     # handle slogans, history, ...
     if self.nodeName in ["history", "slogan", "reference"]:
-      # TODO requires to remove the \newenvironment so that plasTeX actually sees it
-      # TODO is it possible to give a bogus optional argument to the comment environment to keep track of the type in TeX?
-
       # Reach top level environment containing this node.
       # ASSUMPTION: The only other node type possibly containing this node is
       #             a paragraph node.
