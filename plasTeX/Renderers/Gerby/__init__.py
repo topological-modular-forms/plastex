@@ -149,7 +149,7 @@ def linearRepresentation(document):
 
     stack.extend(node.childNodes)
 
-  document.userdata["linear"] = list(reversed(document.userdata["linear"])) # TODO figure out why this is necessary
+  document.userdata["linear"] = list(reversed(document.userdata["linear"]))
 
 def partsList(document):
   """Make an association between parts and chapters"""
