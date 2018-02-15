@@ -37,8 +37,8 @@ def willItBeWhitespace(node):
   if node.isElementContentWhitespace:
   # Spaces, newlines, and comments are whitespace known to plasTeX
     return True
-  elif node.nodeName in ["label","reference"]:
-  # labels and references are currently assumed to be whitespace
+  elif node.nodeName in ["label","reference","slogan","history"]:
+  # labels, references, slogans, and history are currently assumed to be whitespace
     return True
   elif node.nodeName == "par":
   # A paragraph is whitespace if all it contains is whitespace
