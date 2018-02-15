@@ -9,6 +9,11 @@ class xymatrix(NoCharSubCommand):
     """ End of a row """
     macroName = '\\'
 
+  class CellDelimiter(Command):
+    """ Cell delimiter """
+    macroName = 'active::&'
+    pass
+
   class ar(Command):
     pass
 

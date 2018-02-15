@@ -61,10 +61,6 @@ class GerbyRenderable(Renderable):
 
     # handle proofs
     if self.nodeName == "proof":
-      # TODO this is a workaround for a weird bug
-      if "caption" not in self.attributes:
-        raise AttributeError
-
       # caption can contain a \ref
       if self.attributes["caption"] and len(self.attributes["caption"].getElementsByTagName("ref")) > 0:
         # use the first one for now, in theory there could be more
