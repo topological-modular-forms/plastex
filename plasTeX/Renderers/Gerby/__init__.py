@@ -280,6 +280,10 @@ class Gerby(_Renderer):
       del Node.renderer
       unmix(Node, Gerby.renderableClass)
 
+    # write meta information, like line count.
+    with open("meta.statistics", "w") as f:
+      json.dump(document.context.meta, f)
+
 Renderer = Gerby
 
 
