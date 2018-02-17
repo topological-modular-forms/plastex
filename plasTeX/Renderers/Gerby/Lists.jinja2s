@@ -17,5 +17,12 @@ name: description
 </dl>
 
 name: item
-{% if obj.attributes['term'] %}<li class="custom-item" data-marker="{{ obj.attributes['term'] }}">{% else %}<li>{% endif %}{{ obj }}</li>
-{# TODO handle labels, tags #}
+{% if obj.attributes['term'] %}
+<li class="custom-item" data-marker="{{- obj.attributes['term'] -}}">
+{% elif obj.userdata['tag'] %}
+<li class="custom-item" data-marker="{{- obj.userdata['tag'] -}}" id="{{- obj.userdata['tag'] -}}">
+{% else %}
+<li>
+{% endif %}
+  {{- obj -}}
+</li>
