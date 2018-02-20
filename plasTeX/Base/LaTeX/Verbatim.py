@@ -5,13 +5,14 @@ C.6.4 Verbatim
 
 """
 
-from plasTeX import Macro, Environment, NoCharSubEnvironment, Command, sourceArguments, sourceChildren
+from plasTeX import Macro, Environment, Command, sourceArguments, sourceChildren
 from plasTeX.Base.TeX.Text import bgroup, egroup
 from plasTeX.Tokenizer import Other
 
-class verbatim(NoCharSubEnvironment):
+class verbatim(Environment):
     blockType = True
     captionable = True
+    doCharSubs = False
 
     def invoke(self, tex):
         """ Parse until we reach `\end{verbatim}' or `\endverbatim' """
@@ -75,10 +76,6 @@ class verbatim(NoCharSubEnvironment):
                     break
 
         return tokens
-
-    def normalize(self, charsubs=None):
-        """ Normalize, but don't allow character substitutions """
-        return Environment.normalize(self)
 
 class endverbatim(verbatim):
     def invoke(self, tex):

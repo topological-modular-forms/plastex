@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-from plasTeX import NoCharSubCommand, Command
+from plasTeX import Command
 
-class xymatrix(NoCharSubCommand):
+class xymatrix(Command):
   args = '{ str }'
+  doCharSubs = False
 
   class EndRow(Command):
     """ End of a row """

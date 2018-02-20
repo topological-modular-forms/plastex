@@ -143,6 +143,9 @@ class Macro(Element):
     # Force there to be at least on paragraph in the content
     forcePars = False
 
+    # Whether or not to perform character substitutions
+    doCharSubs = True
+
     def persist(self, attrs=None):
         """
         Store attributes needed for cross-document links
@@ -776,6 +779,12 @@ class Macro(Element):
                 elif len(item) == 1 and item[0].isElementContentWhitespace:
                     self.pop(i)
 
+    def normalize(self,charsubs=None):
+        if self.doCharSubs:
+            super(Macro,self).normalize(self.ownerDocument.charsubs)
+        else:
+            super(Macro,self).normalize()
+
 class TeXFragment(DocumentFragment):
     """ Document fragment node """
     @property
@@ -916,40 +925,6 @@ class Environment(Macro):
 #       print 'DONE', type(self)
         if dopars:
             self.paragraphs()
-
-
-class NoCharSubEnvironment(Environment):
-    """
-    A subclass of Environment which prevents character substitution inside
-    itself.
-    """
-    def __init__(self, *args, **kwargs):
-        # Will hold the owner document charsubs to restore it at the end
-        self.charsubs = []
-        super(NoCharSubEnvironment, self).__init__(*args, **kwargs)
-
-    def normalize(self, charsubs=None):
-        """ Normalize, but don't allow character substitutions """
-        return Environment.normalize(self)
-
-class NoCharSubCommand(Command):
-    """
-    A subclass of Command which prevents character substituton inside within
-    arguments of the command.
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.charsubs = []
-        super(NoCharSubCommand, self).__init__(*args, **kwargs)
-
-    def preArgument(self, arg, tex):
-        self.charsubs = self.ownerDocument.charsubs
-        self.ownerDocument.charsubs = []
-        super(NoCharSubCommand, self).preArgument(arg, tex)
-
-    def postArgument(self, arg, value, tex):
-        self.ownerDocument.charsubs = self.charsubs
-        super(NoCharSubCommand, self).postArgument(arg, value, tex)
 
 class IgnoreCommand(Command):
     """
