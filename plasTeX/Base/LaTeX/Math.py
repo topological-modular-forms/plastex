@@ -112,9 +112,11 @@ class EqnarrayStar(Array):
     macroName = 'eqnarray*'
     blockType = True
     mathMode = True
+    doCharSubs = False
 
     class lefteqn(Command):
         args = 'self'
+
         def digest(self, tokens):
             res = Command.digest(self, tokens)
             obj = self.parentNode
@@ -126,9 +128,13 @@ class EqnarrayStar(Array):
             return res
 
     class ArrayCell(Array.ArrayCell):
+        doCharSubs = False
         @property
         def source(self):
             return '$\\displaystyle %s $' % sourceChildren(self, par=False)
+
+    class ArrayRow(Array.ArrayRow):
+        doCharSubs = False
 
 class eqnarray(EqnarrayStar):
     macroName = None
