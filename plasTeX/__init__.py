@@ -779,12 +779,6 @@ class Macro(Element):
                 elif len(item) == 1 and item[0].isElementContentWhitespace:
                     self.pop(i)
 
-    def normalize(self,charsubs=None):
-        if self.doCharSubs:
-            super(Macro,self).normalize(self.ownerDocument.charsubs)
-        else:
-            super(Macro,self).normalize()
-
 class TeXFragment(DocumentFragment):
     """ Document fragment node """
     @property

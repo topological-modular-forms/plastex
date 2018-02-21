@@ -1070,6 +1070,9 @@ class Node(object):
 
         """
         charsubs = charsubs or []
+        if not getattr(self, "doCharSubs", True) or self.ownerDocument.context.isMathMode:
+            charsubs = []
+
         if self.hasAttributes():
             for value in list(self.attributes.values()):
                 if isinstance(value, Node):
