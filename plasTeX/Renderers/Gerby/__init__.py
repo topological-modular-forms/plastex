@@ -239,6 +239,9 @@ class Gerby(_Renderer):
     # remove empty paragraphs
     s = re.compile(r'<p>\s*</p>', re.I).sub(r'', s)
 
+    # Remove extra paragraph tags around displaymath
+    s = re.compile(r'<p>(<div class="equation">.*?<\/div>)<\/p>', flags=re.DOTALL).sub(r'\1',s)
+
     return s
 
   def render(self, document):
