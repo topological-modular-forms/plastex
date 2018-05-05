@@ -12,4 +12,4 @@ name: tableofcontents input @vobeyspaces @noligs def protect let \
       vskip pagestyle centerline hyperref marginnote normalmarginpar
 
 name: texorpdfstring
-{{ obj.argSource[1:-1].split("}{")[0] }}
+{{ obj.argSources['tex'][1:-1] }}
