@@ -107,7 +107,7 @@ class autoref(Command):
 class pdfstringdef(Command):
     args = 'macroname:string tex:string'
 
-class textorpdfstring(Command):
+class texorpdfstring(Command):
     args = 'tex:string pdf:string'
 
 class pdfstringdefDisableCommands(Command):
