@@ -462,6 +462,7 @@ class Macro(Element):
             return
 
         self.argSource = ''
+        self.argSources = {}
         arg = None
         try:
             for arg in self.arguments:
@@ -469,6 +470,7 @@ class Macro(Element):
                 output, source = tex.readArgumentAndSource(parentNode=self,
                                                            name=arg.name,
                                                            **arg.options)
+                self.argSources[arg.name] = source
                 self.argSource += source
                 self.attributes[arg.name] = output
                 self.postArgument(arg, output, tex)
