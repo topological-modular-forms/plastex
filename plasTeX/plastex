@@ -95,7 +95,7 @@ def main(argv):
 
     # Change to specified directory to output to
     if outdir:
-        log.info('Directing output files to directory: %s.' % outdir)
+        log.info('Directing output files to directory: %s' % outdir)
         os.chdir(outdir)
 
     # Load renderer

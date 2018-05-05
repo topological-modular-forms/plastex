@@ -157,8 +157,8 @@ def tagRollCall(document):
         node = stack.pop()
         try:
             tag = node.userdata.get("tag")
-            if tag and tag in tagChecklist:
-                tagChecklist[tag] = True
+            if tag and tag in attendanceSheet:
+                attendanceSheet[tag] = True
         except:
             pass
 
