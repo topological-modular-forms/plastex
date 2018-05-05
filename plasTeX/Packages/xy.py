@@ -16,7 +16,15 @@ class xymatrix(Command):
     pass
 
   class ar(Command):
-    pass
+    args = '[ misc:str ]'
+
+  class arAt(Command):
+    macroName = "ar@"
+    args = 'arType:str [ misc:str ]'
+
+    def postArgument(self, arg, value, tex):
+      self.argSource = self.argSource.replace("~ ","~")
+      super(Command, self).postArgument(arg, value, tex)
 
   class omit(Command):
     @property
