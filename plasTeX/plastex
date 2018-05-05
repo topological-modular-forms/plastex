@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, string, glob
+import os, sys, string, glob, shutil
 import importlib
 import plasTeX
 from plasTeX.TeX import TeX
@@ -69,6 +69,23 @@ def main(argv):
                 continue
             document.context.restore(fname, rname)
 
+    # Check whether or not output directory is empty
+    outdir = config['files']['directory']
+    if outdir:
+        outdir = string.Template(outdir).substitute({'jobname':jobname})
+        if os.path.isdir(outdir) and os.listdir(outdir) != []:
+            log.warning('Directory "%s" is not empty!' % outdir)
+            delete = input('Delete "%s"? [y/n] ' % outdir)
+            if delete == 'y':
+                log.warning('Deleting "%s"...' % outdir)
+                # TODO: How to make this safer...?
+                shutil.rmtree(outdir)
+            else:
+                log.warning('Continuing without deleting "%s"...' % outdir)
+
+        if not os.path.isdir(outdir):
+            os.mkdir(outdir)
+
     # Parse the document
     tex.parse()
 
@@ -77,11 +94,7 @@ def main(argv):
                                          os.environ.get('TEXINPUTS',''), os.pathsep)
 
     # Change to specified directory to output to
-    outdir = config['files']['directory']
     if outdir:
-        outdir = string.Template(outdir).substitute({'jobname':jobname})
-        if not os.path.isdir(outdir):
-            os.makedirs(outdir)
         log.info('Directing output files to directory: %s.' % outdir)
         os.chdir(outdir)
 
