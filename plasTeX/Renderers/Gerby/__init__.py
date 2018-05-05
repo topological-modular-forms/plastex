@@ -147,6 +147,24 @@ def linearRepresentation(document):
 
   document.userdata["linear"] = list(reversed(document.userdata["linear"]))
 
+def tagRollCall(document):
+    # Check whether or not all tags appear in the document
+    attendanceSheet = dict(map(lambda t: (t, False), document.userdata["tags"].keys()))
+
+    stack = list()
+    stack.extend(document.childNodes)
+    while len(stack) > 0:
+        node = stack.pop()
+        try:
+            tag = node.userdata.get("tag")
+            if tag and tag in tagChecklist:
+                tagChecklist[tag] = True
+        except:
+            pass
+
+        stack.extend(node.childNodes)
+    return attendanceSheet
+
 def partsList(document):
   """Make an association between parts and chapters"""
   parts = dict()
@@ -258,6 +276,10 @@ class Gerby(_Renderer):
 
     # create a linearised version of the document containing theorems and proofs in order
     linearRepresentation(document)
+
+    tagAttendanceSheet = tagRollCall(document)
+    for tag in filter(lambda t: not tagAttendanceSheet[t], tagAttendanceSheet):
+      log.warning("document does not contain tag %s" % tag)
 
     # associate parts to chapters
     parts = partsList(document)
