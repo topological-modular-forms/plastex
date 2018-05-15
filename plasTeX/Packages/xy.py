@@ -69,3 +69,14 @@ class xymatrixL(xymatrix):
 
 class xymatrix1(xymatrix):
   macroName = "xymatrix@1"
+
+class xyoption(Command):
+  # Options for xymatrix; unless we are writing xymatrix completely in python,
+  # this is mostly irrelevant.
+  pass
+
+class useTwocells(Command):
+  macroName ="UseTwocells"
+
+class useAllTwocells(Command):
+  macroName = "UseAllTwocells"
