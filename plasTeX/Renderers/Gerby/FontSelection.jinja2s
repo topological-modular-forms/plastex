@@ -1,5 +1,5 @@
-name: bf
+name: bf bfseries textbf
 <strong>{{ obj }}</strong>
 
-name: it
+name: it itseries textit
 <em>{{ obj }}</em>
