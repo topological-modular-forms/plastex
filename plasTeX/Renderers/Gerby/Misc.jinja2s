@@ -13,3 +13,6 @@ name: tableofcontents input @vobeyspaces @noligs def protect let \
 
 name: texorpdfstring
 {{ obj.argSources['tex'][1:-1] }}
+
+name: href
+<a href="{{ obj.argSources['url'][1:-1] }}">{{ obj }}</a>
