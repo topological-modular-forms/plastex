@@ -6,10 +6,11 @@ name: bgroup
 name: tableofcontents input @vobeyspaces @noligs def protect let \
       newcommand hfill hline openout renewcommand write hspace appendix \
       global noindent include markboth setcounter refstepcounter \
-      medskip smallskip parindent indent setlength settowidth addtolength \
-      nopagebreak newwrite newcounter typeout sloppypar hfil thispagestyle vfill \
+      bigskip medskip smallskip parindent indent setlength settowidth addtolength \
+      nopagebreak newwrite newcounter typeout sloppypar thispagestyle vfill \
       hypertarget newenvironment reversemarginpar phantomsection \
-      vskip pagestyle centerline hyperref marginnote normalmarginpar
+      vskip pagestyle centerline hyperref marginnote normalmarginpar \
+      bibliography bibliographystyle
 
 name: texorpdfstring
 {{ obj.argSources['tex'][1:-1] }}
