@@ -3,3 +3,6 @@ name: bf bfseries textbf
 
 name: it itseries textit
 <em>{{ obj }}</em>
+
+name: large
+<big>{{ obj }}</big>
