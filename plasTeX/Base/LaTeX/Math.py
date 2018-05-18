@@ -664,6 +664,9 @@ class boldmath(Command):
 class unboldmath(Command):
     pass
 
+class text(Command):
+    args = 'self'
+
 # Math Style
 
 class displaystyle(Command):
