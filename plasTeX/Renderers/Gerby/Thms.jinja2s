@@ -37,3 +37,6 @@ name: proof
     {% endif %}
   {% endfor %}
 </article>
+
+name: reference slogan history
+{{ obj }}
