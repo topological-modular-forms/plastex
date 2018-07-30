@@ -105,16 +105,16 @@ class autoref(Command):
     args = 'label:idref'
 
 class pdfstringdef(Command):
-    args = 'macroname:string tex:string'
+    args = 'macroname:str tex:str'
 
 class texorpdfstring(Command):
-    args = 'tex:string pdf:string'
+    args = 'tex:str pdf:str'
 
 class pdfstringdefDisableCommands(Command):
-    args = 'tex:string'
+    args = 'tex:str'
 
 class hypercalcbp(Command):
-    args = 'size:string'
+    args = 'size:str'
 
 
 # Forms
