@@ -13,7 +13,7 @@ name: tableofcontents input @vobeyspaces @noligs def protect let \
       bibliography bibliographystyle
 
 name: texorpdfstring
-{{ obj.attributes.tex }}
+{{ obj.argSources['tex'][1:-1] }}
 
 name: href
 <a href="{{ obj.argSources['url'][1:-1] }}">{{ obj }}</a>
