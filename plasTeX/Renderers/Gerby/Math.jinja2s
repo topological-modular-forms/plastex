@@ -1,10 +1,10 @@
 name: math DeclareMathOperator
-{{ obj.source | replace("<", " < ") | replace(">", " > ") }}
+{{ obj.source }}
 
 name: ensuremath eqnarray* align* gather* flalign flalign* \
       multline multline* alignat alignat* split displaymath equation*
 <div class="equation">
-  {{ obj.source | replace("<", " < ") | replace(">", " > ") }}
+  {{ obj.source }}
 </div>
 
 name: equation eqnarray align gather
@@ -14,5 +14,5 @@ name: equation eqnarray align gather
   {% else %}
     <span class="equation-label">{{ obj.ref }}</span>
   {% endif %}
-  <div>{{ obj.source | replace("<", " < ") | replace(">", " > ") }}</div>
+  <div>{{ obj.source }}</div>
 </div>
