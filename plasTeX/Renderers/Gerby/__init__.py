@@ -258,7 +258,7 @@ class Gerby(_Renderer):
     s = re.compile(r'<p>\s*</p>', re.I).sub(r'', s)
 
     # Remove extra paragraph tags around displaymath
-    s = re.compile(r'<p>(<div class="equation">.*?<\/div>)<\/p>', flags=re.DOTALL).sub(r'\1',s)
+    s = re.compile(r'<p>(<div class="equation".*?<\/div>)<\/p>', flags=re.DOTALL).sub(r'\1',s)
 
     return s
 
