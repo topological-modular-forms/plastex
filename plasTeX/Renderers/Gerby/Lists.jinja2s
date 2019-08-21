@@ -21,7 +21,7 @@ name: item
 {%- if obj.attributes['term'] or obj.userdata['tag'] %}
  class="custom-item"
   {%- if obj.attributes['term'] %}
- data-marker="{{- obj.attributes['term'] -}}"
+ data-marker="{{- obj.attributes['term'] | striptags -}}"
   {%- endif -%}
   {%- if obj.userdata['tag'] %}
  id="{{- obj.userdata['tag'] -}}"
