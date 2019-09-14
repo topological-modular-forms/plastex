@@ -62,7 +62,7 @@ class GerbyRenderable(Renderable):
     # handle proofs
     if self.nodeName == "proof":
       # caption can contain a \ref
-      if self.attributes["caption"] and len(self.attributes["caption"].getElementsByTagName("ref")) > 0:
+      if "caption" in self.attributes and self.attributes["caption"] and len(self.attributes["caption"].getElementsByTagName("ref")) > 0:
         # use the first one for now, in theory there could be more
         label = [ref.attributes["label"] for ref in self.attributes["caption"].getElementsByTagName("ref")][0]
       # just take the closest theorem
