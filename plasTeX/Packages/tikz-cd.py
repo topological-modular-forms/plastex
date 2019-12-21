@@ -73,3 +73,9 @@ def ProcessOptions(options, document):
             key='processFileContents',
             data=convert)
     document.addPackageResource(cb)
+
+    cb = PackageResource(
+            renderers='gerby',
+            key='processFileContents',
+            data=convert)
+    document.addPackageResource(cb)

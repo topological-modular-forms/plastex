@@ -247,12 +247,25 @@ class Gerby(_Renderer):
     srcDir = document.userdata['working-dir']
     buildDir = os.getcwd()
 
+    for resrc in document.packageResources:
+        # Next line may load templates or change
+        # document.rendererdata['html5'] or copy some files to buildDir
+        resrc.alter(
+                renderer=self,
+                rendererName='gerby',
+                document=document,
+                target=buildDir)
+
+
   def cleanup(self, document, files, postProcess=None):
     res = _Renderer.cleanup(self, document, files, postProcess=postProcess)
     return res
 
   def processFileContent(self, document, s):
     s = _Renderer.processFileContent(self, document, s)
+
+    for fun in document.rendererdata["gerby"].get('processFileContents', []):
+      s = fun(document, s)
 
     # remove empty paragraphs
     s = re.compile(r'<p>\s*</p>', re.I).sub(r'', s)
