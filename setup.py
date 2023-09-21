@@ -4,6 +4,9 @@ try:
 except ImportError:
     from distutils.core import setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 templates = ['*.html','*.htm','*.xml','*.zpt','*.zpts','*.jinja2','*.jinja2s']
 images = ['*.gif','*.png','*.jpg','*.jpeg','*.js','*.htc','*.svg']
 styles = ['*.css']
@@ -11,10 +14,17 @@ javascript = ['*.js']
 
 setup(name="plasTeX",
       description="LaTeX document processing framework",
-      version="1.0",
+      long_description = long_description,
+      long_description_content_type="text/markdown",
+      version="2.0",
       author="Kevin D. Smith",
       author_email="Kevin.Smith@sas.com",
-      #url="",
+      url="https://github.com/tiarno/plastex",
+      classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        ],
       packages = [
          'plasTeX',
          'plasTeX.Base',
@@ -25,9 +35,7 @@ setup(name="plasTeX",
          'plasTeX.Imagers',
          'plasTeX.Packages',
          'plasTeX.Renderers',
-
          'plasTeX.Renderers.Gerby',
-
          'plasTeX.Renderers.XHTML',
          'plasTeX.Renderers.XHTML.Themes',
          'plasTeX.Renderers.XHTML.Themes.default',
@@ -64,9 +72,7 @@ setup(name="plasTeX",
          'plasTeX.Renderers.DocBook.Themes.default': templates,
          'plasTeX.Renderers.DocBook.Themes.book': templates,
          'plasTeX.Renderers.DocBook.Themes.article': templates,
-
          'plasTeX.Renderers.Gerby': templates,
-
          'plasTeX.Renderers.XHTML': templates,
          'plasTeX.Renderers.XHTML.Themes.default': templates,
          'plasTeX.Renderers.XHTML.Themes.default.icons': images,

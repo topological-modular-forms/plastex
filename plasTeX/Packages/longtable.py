@@ -3,7 +3,7 @@
 import sys
 from plasTeX.Base.LaTeX.Arrays import tabular
 from plasTeX import Command, DimenCommand, CountCommand, GlueCommand 
-from plasTeX import dimen, glue, count, TeXFragment
+from plasTeX import dimen, glue, count
 
 class LTleft(GlueCommand): value = glue('1fil')
 class LTright(GlueCommand): value = glue('1fil')

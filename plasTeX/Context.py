@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from plasTeX import ismacro, macroName
-from plasTeX.DOM import Node
 from plasTeX.Logging import getLogger
 from plasTeX.Tokenizer import Tokenizer, Token, DEFAULT_CATEGORIES, VERBATIM_CATEGORIES
 import os
@@ -1020,7 +1019,7 @@ class Context(object):
 
     def newdef(self, name, args=None, definition=None, local=True):
         """
-        Create a \def
+        Create a \\def
 
         Required Arguments:
         name -- name of the macro to create
@@ -1056,7 +1055,7 @@ class Context(object):
 
     def let(self, dest, source):
         """
-        Create a \let
+        Create a \\let
 
         Required Arguments:
         dest -- the command sequence to create

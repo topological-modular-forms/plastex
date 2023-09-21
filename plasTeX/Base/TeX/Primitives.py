@@ -2,9 +2,10 @@
 
 import datetime
 from plasTeX.Tokenizer import Token, EscapeSequence, Other
-from plasTeX import Command, Environment, CountCommand
-from plasTeX import IgnoreCommand, sourceChildren
+from plasTeX import Command, CountCommand
+from plasTeX import sourceChildren
 from plasTeX.Logging import getLogger
+
 
 log = getLogger()
 status = getLogger('status')
@@ -69,7 +70,7 @@ class MathShift(Command):
     inEnv = []
 
     def invoke(self, tex):
-        """
+        r"""
         This gets a bit tricky because we need to keep track of both
         our beginning and ending.  We also have to take into
         account \mbox{}es.
@@ -232,7 +233,7 @@ class ifdim(IfCommand):
 class ifodd(IfCommand):
     """ Test for odd integer """
     def invoke(self, tex):
-        tex.processIfContent(not(not(tex.readNumber(optspace=False) % 2)))
+        tex.processIfContent(bool(tex.readNumber(optspace=False) % 2))
         return []
 
 class ifeven(IfCommand):
@@ -386,7 +387,7 @@ class catcode(Command):
         a = self.parse(tex)
         self.ownerDocument.context.catcode(chr(a['char']), a['code'])
     def source(self):
-        return '\\catcode`\%s=%s' % (chr(self.attributes['char']),
+        return r'\catcode`%s=%s' % (chr(self.attributes['char']),
                                      self.attributes['code'])
     source = property(source)
 
@@ -402,7 +403,6 @@ class csname(Command):
 
 class endcsname(Command):
     """ \\endcsname """
-    pass
 
 class input(Command):
     """ \\input """

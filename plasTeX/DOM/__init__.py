@@ -1100,7 +1100,7 @@ class Node(object):
 
     def hasAttributes(self):
         """ Are there any attributes set? """
-        return not(not(self.attributes))
+        return bool(self.attributes)
 
     @property
     def textContent(self):
@@ -1788,11 +1788,11 @@ class UserDataHandler(object):
     """
 
     # OperationType
-    NODE_CLONED = 1;
-    NODE_IMPORTED = 2;
-    NODE_DELETED = 3;
-    NODE_RENAMED = 4;
-    NODE_ADOPTED = 5;
+    NODE_CLONED = 1
+    NODE_IMPORTED = 2
+    NODE_DELETED = 3
+    NODE_RENAMED = 4
+    NODE_ADOPTED = 5
 
     def handle(self, operation, key, data, src, dst):
         raise NotImplementedError

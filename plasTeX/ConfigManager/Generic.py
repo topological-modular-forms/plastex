@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import re, os, copy
-from plasTeX.ConfigManager import BUILTIN, CODE, ENVIRON, ENVIRONMENT
-from plasTeX.ConfigManager import CODE, REGISTRY, COMMANDLINE, InvalidOptionError
+from plasTeX.ConfigManager import BUILTIN, CODE, ENVIRONMENT
+from plasTeX.ConfigManager import COMMANDLINE, InvalidOptionError
 from plasTeX.ConfigManager import ConfigManager, TooManyValues, TooFewValues
-import collections
+import collections.abc
+
 
 DEFAULTS = \
 {
@@ -139,7 +140,7 @@ class GenericParser:
          raise TooManyValues("Expecting at most %s values for '%s'." % (range[1], name))
 
       # Collapse argument list to a value if possible
-      if len(new_args) < 1:
+      if not new_args:
          if self.optional is not None:
             new_args = self.optional
          else:
@@ -206,7 +207,7 @@ class GenericOption(object):
                       mandatory=None,
                       name=DEFAULTS['name'],
                       source=DEFAULTS['source']):
-      """
+      r"""
       Declare a command line option
 
       Instances of subclasses of CommandLineOption must be placed in
@@ -560,8 +561,8 @@ class GenericOption(object):
 
       """
       return {}
-      return {'name': self.name, 'default': self.default,
-              'option': self.actual, 'synopsis': self.synopsis}
+      #return {'name': self.name, 'default': self.default,
+      #        'option': self.actual, 'synopsis': self.synopsis}
 
    def __lt__(self, other): return self.compare(other) < 0
    def __gt__(self, other): return self.compare(other) > 0
@@ -573,11 +574,8 @@ class GenericOption(object):
    def compare(self, other):
       """ Compare option to another using the specified sort order """
       for attr in self.sort_order:
-          sattr = getattr(self, attr)
-          oattr = getattr(other, attr)
-
-          if sattr == None: sattr = ''
-          if oattr == None: oattr = ''
+          sattr = getattr(self, attr, '')
+          oattr = getattr(other, attr, '')
 
           if type(sattr) is str and type(oattr) is str:
               sattr = re.sub(r'\W', '', sattr)
@@ -605,7 +603,7 @@ class GenericOption(object):
       if value is None:
          self.clearValue()
       else:
-         if isinstance(self.callback, collections.Callable):
+         if isinstance(self.callback, collections.abc.Callable):
             value = self.callback(self.cast(value))
          self.data = self.validate(value)
 
@@ -703,8 +701,7 @@ class GenericOption(object):
                       (', '.join(map(str, self.values))))
 
       # Check to see if the value is equal to the only valid value
-      elif isinstance(self.values, str) or isinstance(self.values, int) \
-           or isinstance(self.values, float):
+      elif isinstance(self.values, (str, int, float)):
          if value == self.values:
             return value
 

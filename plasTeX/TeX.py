@@ -16,8 +16,8 @@ Example:
 
 """
 from io import IOBase
-import string, os, traceback, sys, plasTeX, subprocess, types
-from plasTeX.Tokenizer import Tokenizer, Token, EscapeSequence, Other, EndInput
+import string, os, sys, plasTeX, subprocess
+from plasTeX.Tokenizer import Tokenizer, Token, EscapeSequence, Other
 from plasTeX import TeXDocument
 from plasTeX.Base.TeX.Primitives import MathShift
 from plasTeX import ParameterCommand, Macro
@@ -270,7 +270,7 @@ class TeX(object):
                     t.parentNode = None
                     yield t
 
-            except (EndInput, StopIteration):
+            except StopIteration:
                 endInput()
 
             # This really shouldn't happen, but just in case...
@@ -980,7 +980,6 @@ class TeX(object):
         # Could not find specified type
         elif dtype not in list(argtypes.keys()):
             log.warning('Could not find datatype "%s"' % dtype)
-            pass
 
         # Casting to specified type
         else:
@@ -1367,7 +1366,7 @@ class TeX(object):
 
         except:
             fullname = ''
-            paths = os.environ["TEXINPUTS"].split(os.path.pathsep)
+            paths = os.environ.get("TEXINPUTS",'').split(os.path.pathsep)
             for path in [x for x in paths if x]:
                 if name in os.listdir(path):
                     fullname = os.path.join(path,name)

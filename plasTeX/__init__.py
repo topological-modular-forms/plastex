@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ = '9.3'
+__version__ = '2.0'
 
 from plasTeX import Logging, encoding
 from plasTeX.DOM import Element, Text, Node, DocumentFragment, Document
@@ -475,9 +475,9 @@ class Macro(Element):
                 self.attributes[arg.name] = output
                 self.postArgument(arg, output, tex)
         except:
-            raise
             log.error('Error while parsing argument "%s" of "%s"' %
                        (arg.name, self.nodeName))
+            raise
 
         self.postParse(tex)
 
@@ -776,7 +776,7 @@ class Macro(Element):
         for i in range(len(self) - 1, -1, -1):
             item = self[i]
             if item.level == Node.PAR_LEVEL:
-                if len(item) == 0:
+                if not item:
                     self.pop(i)
                 elif len(item) == 1 and item[0].isElementContentWhitespace:
                     self.pop(i)

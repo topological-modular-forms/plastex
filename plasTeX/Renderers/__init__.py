@@ -137,7 +137,7 @@ class Renderable(object):
             if child.filename:
                 # Force footnotes to be cached
                 if hasattr(child, 'footnotes'):
-                    child.footnotes
+                    _ = child.footnotes
 
                 status.info(' [ %s ', child.filename)
 
@@ -379,7 +379,7 @@ class Renderer(dict):
 
         """
         # Using the side-effect of the filename property
-        node.filename
+        _ = node.filename
         for child in node.childNodes:
             self.cacheFilenames(child)
 
@@ -433,7 +433,7 @@ class Renderer(dict):
             elif name == 'OSXCoreGraphics':
                 from plasTeX.Imagers.OSXCoreGraphics  import Imager
             else:
-                log.warning("Could not load imager '%s' because '%s'" % (name, msg))
+                log.warning("Invalid imager '%s'")
                 continue
 
             self.imager = Imager(document, self.imageTypes)
@@ -462,13 +462,13 @@ class Renderer(dict):
         for name in names:
             if name == 'none':
                 break
-            try:
-                exec('from plasTeX.Imagers.%s import Imager' % name)
-            except ImportError as msg:
-                log.warning("Could not load imager '%s' because '%s'" % (name, msg))
+            elif name == 'dvisvgm':
+                from plasTeX.Imagers.dvisvgm import Imager as VectorImager
+            else:
+                log.warning("Invalid imager '%s'")
                 continue
 
-            self.vectorImager = Imager(document, self.vectorImageTypes)
+            self.vectorImager = VectorImager(document, self.vectorImageTypes)
 
             # Make sure that this imager works on this machine
             if self.vectorImager.verify():
@@ -554,7 +554,7 @@ class Renderer(dict):
                 continue
 
             s = self.processFileContent(document, s)
-            if isinstance(postProcess, collections.Callable):
+            if isinstance(postProcess, collections.abc.Callable):
                 s = postProcess(document, s)
 
             with open(f, 'w', encoding=encoding) as fd:

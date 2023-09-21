@@ -1,6 +1,9 @@
 name: ref
 <a href="/tag/{{ here.idref.label.userdata['tag'] }}" data-tag="{{ here.idref.label.userdata['tag'] }}">{{ here.idref.label.ref }}</a>
 
+name: cref Cref
+<a href="/tag/{{ here.idref.label.userdata['tag'] }}" data-tag="{{ here.idref.label.userdata['tag'] }}">{{ here.refname() }} {{ here.idref.label.ref }}</a>
+
 name: label
 
 name: url

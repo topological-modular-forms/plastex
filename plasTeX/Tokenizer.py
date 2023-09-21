@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import string
 from plasTeX.DOM import Node, Text
 from plasTeX import encoding
 from io import BytesIO, StringIO, TextIOWrapper
@@ -29,9 +28,6 @@ DEFAULT_CATEGORIES = [
 
 VERBATIM_CATEGORIES = [''] * 16
 VERBATIM_CATEGORIES[11] = encoding.stringletters()
-
-class EndInput(Exception):
-    pass
 
 class Token(Text):
     """ Base class for all TeX tokens """
@@ -309,7 +305,7 @@ class Tokenizer(object):
                     code = whichCode(token)
 
             # Just go to the next character if you see one of these...
-            if code == CC_IGNORED or code == CC_INVALID:
+            if code in (CC_IGNORED, CC_INVALID):
                 continue
 
             yield classes[code](token)
@@ -389,7 +385,7 @@ class Tokenizer(object):
             try:
                 token = next(charIter)
             except StopIteration:
-                raise EndInput
+                return
 
             if token.nodeType == ELEMENT_NODE:
                 raise ValueError('Expanded tokens should never make it here')
@@ -397,7 +393,7 @@ class Tokenizer(object):
             code = token.catcode
 
             # Short circuit letters and other since they are so common
-            if code == CC_LETTER or code == CC_OTHER:
+            if code in (CC_LETTER, CC_OTHER):
                 self.state = STATE_M
 
             # Whitespace

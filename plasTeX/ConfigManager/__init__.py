@@ -320,7 +320,7 @@ class ConfigSection(UserDict, object):
         value = self.getraw(option, vars)
 
         # Raw was specified
-        if raw or value == None: return value
+        if raw or not value: return value
 
         # If we have a list, see if any strings need interpolation.
         if type(value) in [list, tuple]:
@@ -420,7 +420,7 @@ class ConfigSection(UserDict, object):
 
                # Bypass unset options
                if isinstance(option, MultiOption) and raw == []: continue
-               if raw == None: continue
+               if not raw: continue
 
                # Print description or summary of the option as well
                comment = ''
@@ -583,7 +583,7 @@ class ConfigManager(UserDict, object):
         """ Return the dictionary of categories """
         return self._categories
 
-    def set_strict(self, bool=1):
+    def set_strict(self, strict=True):
         """
         Parse the command line strictly
 
@@ -596,10 +596,10 @@ class ConfigManager(UserDict, object):
         option is.
 
         Keyword Arguments:
-        bool -- flag indicating whether parsing should be strict or not
+        strict -- flag indicating whether parsing should be strict or not
 
         """
-        self.strict = not(not(bool))
+        self.strict = bool(strict)
 
     def defaults(self):
         """ Return a dictionary of defaults """
@@ -1126,8 +1126,6 @@ class ConfigManager(UserDict, object):
 
     def merge_options(self, options):
         """ Merge options parsed from the command line into configuration """
-        from plasTeX.ConfigManager.Generic import GenericOption
-        from plasTeX.ConfigManager.Multi import MultiOption
         # Multi options that have been cleared by a command line option.
         # Lists will only be cleared on the first command line option, all
         # consecutive options will append.
@@ -1400,8 +1398,10 @@ class ConfigManager(UserDict, object):
            err('Configuration File: [%s] %s=\n' % (sectkey, optkey))
 
            current = opt.names()['current']
-           if current != None: err('Current Value: %s\n\n' % current)
-           else: err('\n')
+           if not current:
+               err('Current Value: %s\n\n' % current)
+           else:
+               err('\n')
 
            err('%s\n\n' % opt.description)
            if display: err('\n')
@@ -1534,7 +1534,7 @@ class CommandLineManager(OrderedDict):
                  return 1
 
    def getopt(self, args=None):
-      if args == None:
+      if not args:
          args = sys.argv[1:]
       else:
          args = args[:]
@@ -1554,7 +1554,7 @@ class CommandLineManager(OrderedDict):
          else:
             raise ValueError("Unrecognized argument type.")
 
-      if len(args):
+      if args:
          raise TooManyValues('Too many command-line arguments: %s' % ' '.join(args))
 
       return self
@@ -1565,8 +1565,7 @@ class CommandLineManager(OrderedDict):
          value = list(value)
          item = value.pop(0)
          self._associations[key] = value
-      assert isinstance(item, ConfigManager) or \
-             isinstance(item, GenericArgument), \
+      assert isinstance(item, (ConfigManager, GenericArgument)), \
              'Command-line parameters must be ConfigManagers or ' + \
              'subclasses of GenericArgument'
       if hasattr(item, 'name') and item.name is None:
