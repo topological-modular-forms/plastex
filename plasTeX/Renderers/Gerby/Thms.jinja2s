@@ -8,9 +8,9 @@ name: thmenv
   <p>
       {%- if not states.printedIdentifier-%}
         {%- if obj.title -%}
-    <a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.caption }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span> <span class="named">({{ obj.title }})</span>.</a>
+    <a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.caption }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span> <span class="named">({{ obj.title }})</span>.</a>&nbsp;
         {%- else -%}
-    <a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.caption }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span>.</a>
+    <a class="environment-identifier" href="/tag/{{ obj.userdata['tag'] }}">{{ obj.caption }} <span data-tag="{{ obj.userdata['tag'] }}">{{ obj.ref }}</span>.</a>&nbsp;
         {%- endif -%}
         {% if states.update({'printedIdentifier': True}) %}{% endif %}
       {%- endif -%}

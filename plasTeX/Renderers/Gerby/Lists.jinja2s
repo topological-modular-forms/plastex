@@ -4,7 +4,7 @@ name: itemize
 </ul>
 
 name: enumerate
-<ol>
+<ol class="main-list">
   {{ obj }}
 </ol>
 
@@ -27,6 +27,6 @@ name: item
  id="{{- obj.userdata['tag'] -}}"
   {%- endif -%}
 {%- endif -%}
->
+><span class="counter"><a class="counter-link" href="/tag/{{- obj.userdata['tag'] -}}"><span class="counter-inner"></span></a></span>
   {{- obj -}}
 </li>
