@@ -1,4 +1,6 @@
 import os
+import subprocess
+from bs4 import BeautifulSoup
 try:
     from unittest.mock import Mock
 except ImportError:
@@ -31,7 +33,9 @@ def document():
 
         doc = TeXDocument(config=conf)
         tex = TeX(doc)
-        tex.input("\\documentclass{article}\\usepackage{tikz}\n\\begin{document}\\begin{tikzpicture}\draw (0,0) -- (1,0);\\end{tikzpicture}\n\\end{document}")
+        tex.input(r"\documentclass{article}\usepackage{tikz}
+\begin{document}\begin{tikzpicture}\draw (0,0) -- (1,0);\end{tikzpicture}
+\end{document}")
         doc = tex.parse()
         doc.userdata['working-dir'] = '.'
         doc.rendererdata['html5'] = {}
@@ -63,9 +67,9 @@ def document_cd():
 def test_tikz_basic_setup(monkeypatch, tmpdir, document):
     cur_dir = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    mock_sys = Mock()
+    mock_call = Mock()
     mock_move = Mock()
-    monkeypatch.setattr('os.system', mock_sys)
+    monkeypatch.setattr('subprocess.call', mock_call)
     monkeypatch.setattr('os.remove', Mock)
     monkeypatch.setattr('shutil.move', mock_move)
 
@@ -82,8 +86,8 @@ def test_tikz_basic_setup(monkeypatch, tmpdir, document):
     with open(tex_path, 'r') as f:
         assert 'draw' in f.read()
 
-    assert 'pdflatex' in mock_sys.call_args_list[0][0][0]
-    assert 'pdf2svg' in mock_sys.call_args_list[1][0][0]
+    assert 'pdflatex' in mock_call.call_args_list[0][0][0]
+    assert 'pdf2svg' in mock_call.call_args_list[1][0][0]
     assert mock_move.called
 
     assert 'TikZ picture' in tmpdir.join('index.html').read()
@@ -93,9 +97,9 @@ def test_tikz_basic_setup(monkeypatch, tmpdir, document):
 def test_tikz_config_options(monkeypatch, tmpdir, document):
     cur_dir = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    mock_sys = Mock()
+    mock_call = Mock()
     mock_move = Mock()
-    monkeypatch.setattr('os.system', mock_sys)
+    monkeypatch.setattr('subprocess.call', mock_call)
     monkeypatch.setattr('os.remove', Mock)
     monkeypatch.setattr('shutil.move', mock_move)
 
@@ -111,16 +115,16 @@ def test_tikz_config_options(monkeypatch, tmpdir, document):
     with open(tex_path, 'r') as f:
         assert 'usetikzlibrary' in f.read()
 
-    assert 'xelatex' in mock_sys.call_args_list[0][0][0]
-    assert 'mockconv' in mock_sys.call_args_list[1][0][0]
+    assert 'xelatex' in mock_call.call_args_list[0][0][0]
+    assert 'mockconv' in mock_call.call_args_list[1][0][0]
     os.chdir(cur_dir)
 
 def test_tikzcd_basic_setup(monkeypatch, tmpdir, document_cd):
     cur_dir = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    mock_sys = Mock()
+    mock_call = Mock()
     mock_move = Mock()
-    monkeypatch.setattr('os.system', mock_sys)
+    monkeypatch.setattr('subprocess.call', mock_call)
     monkeypatch.setattr('os.remove', Mock)
     monkeypatch.setattr('shutil.move', mock_move)
 
@@ -137,8 +141,8 @@ def test_tikzcd_basic_setup(monkeypatch, tmpdir, document_cd):
     with open(tex_path, 'r') as f:
         assert '\\rar' in f.read()
 
-    assert 'pdflatex' in mock_sys.call_args_list[0][0][0]
-    assert 'pdf2svg' in mock_sys.call_args_list[1][0][0]
+    assert 'pdflatex' in mock_call.call_args_list[0][0][0]
+    assert 'pdf2svg' in mock_call.call_args_list[1][0][0]
     assert mock_move.called
 
     assert 'Commutative diagram' in tmpdir.join('index.html').read()
@@ -149,7 +153,7 @@ def test_tikzcd_config_options(monkeypatch, tmpdir, document_cd):
     os.chdir(os.path.dirname(__file__))
     mock_sys = Mock()
     mock_move = Mock()
-    monkeypatch.setattr('os.system', mock_sys)
+    monkeypatch.setattr('subprocess.call', mock_call)
     monkeypatch.setattr('os.remove', Mock)
     monkeypatch.setattr('shutil.move', mock_move)
 
@@ -165,6 +169,31 @@ def test_tikzcd_config_options(monkeypatch, tmpdir, document_cd):
     with open(tex_path, 'r') as f:
         assert 'usetikzlibrary' in f.read()
 
-    assert 'xelatex' in mock_sys.call_args_list[0][0][0]
-    assert 'mockconv' in mock_sys.call_args_list[1][0][0]
+    assert 'xelatex' in mock_call.call_args_list[0][0][0]
+    assert 'mockconv' in mock_call.call_args_list[1][0][0]
+    os.chdir(cur_dir)
+
+def test_functional(tmpdir):
+    cur_dir = os.getcwd()
+    tmpdir.join('test.tex').write(r"""
+    \documentclass{article} 
+    \usepackage{tikz, tikz-cd}
+    \begin{document}
+    \begin{tikzpicture}
+            \draw (0, 0) -- (1, 0);
+    \end{tikzpicture}
+    \begin{tikzcd}
+            A \\rar & B
+    \end{tikzcd}
+    \end{document}""")
+    os.chdir(str(tmpdir))
+    subprocess.call(
+            ['plastex', '--renderer', 'HTML5', 'test.tex'])
+    assert os.path.isdir(str(tmpdir.join('test')))
+    assert os.path.isfile(str(tmpdir.join('test', 'index.html')))
+    soup = BeautifulSoup(tmpdir.join('test', 'index.html').read(), "html.parser")
+    svgs = soup.findAll('object')
+    for svg in svgs:
+            assert os.path.isfile(str(tmpdir.join('test', svg.attrs['data'])))
+
     os.chdir(cur_dir)
