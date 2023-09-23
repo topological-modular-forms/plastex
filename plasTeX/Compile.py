@@ -3,6 +3,7 @@
 import os, sys, string, glob
 import importlib
 import plasTeX
+from pathlib import Path
 from plasTeX.TeX import TeX
 from plasTeX.ConfigManager import *
 from plasTeX.Logging import getLogger, updateLogLevels
