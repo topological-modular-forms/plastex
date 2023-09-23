@@ -963,22 +963,22 @@ class Context(object):
 
         self.addGlobal(name, newclass)
 
-    def newenvironment(self, name, nargs=0, definition=None, opt=None):
+    def newenvironment(self, name, nargs=0, def_before=None, def_after=None, opt=None):
         """
         Create a \\newenvironment
 
         Required Arguments:
         name -- name of the macro to create
         nargs -- integer number of arguments that the macro has
-        definition -- two-element tuple containing the LaTeX definition.
-            Each element should be a string.  The first element
-            corresponds to the beginning of the environment, and the
-            second element is the end of the environment.
+        def_before -- string corresponding to TeX code inserted before the
+            environment
+        def_after -- string corresponding to TeX code inserted after the
+            environment
         opt -- string containing the LaTeX code to use in the
             optional argument
 
         Examples::
-            c.newenvironment('mylist', 0, (r'\\begin{itemize}', r'\\end{itemize}'))
+            c.newenvironment('mylist', 0, [r'\\begin{itemize}', r'\\end{itemize}'])
 
         """
         # Macro already exists
@@ -992,15 +992,10 @@ class Context(object):
             nargs = 0
         assert isinstance(nargs, int), 'nargs must be an integer'
 
-        if definition is not None:
-            assert isinstance(definition, (tuple, list)), \
-                'definition must be a list or tuple'
-            assert len(definition) == 2, 'definition must have 2 elements'
-
-            if isinstance(definition[0], str):
-                definition[0] = [x for x in Tokenizer(definition[0], self)]
-            if isinstance(definition[1], str):
-                definition[1] = [x for x in Tokenizer(definition[1], self)]
+        if def_before:
+            def_before = list(Tokenizer(def_before, self))
+        if def_after:
+            def_after = list(Tokenizer(def_after, self))
 
         if isinstance(opt, str):
             opt = [x for x in Tokenizer(opt, self)]
@@ -1009,7 +1004,7 @@ class Context(object):
 
         # Begin portion
         newclass = type(name, (plasTeX.NewCommand,),
-                       {'nargs':nargs, 'opt':opt, 'definition':definition[0]})
+                       {'nargs':nargs, 'opt':opt, 'definition':def_after[0]})
         self.addGlobal(name, newclass)
 
         # End portion

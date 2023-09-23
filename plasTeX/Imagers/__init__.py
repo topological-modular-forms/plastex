@@ -614,16 +614,26 @@ class Imager(object):
         p = subprocess.Popen(shlex.split(cmd),
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT,
-                     universal_newlines=True
-                     )
+                     universal_newlines=True)
+        cmd_line = '{} {}{}images.tex'.format(program, tempdir, os.sep)
         while True:
-            line = p.stdout.readline()
+            try:
+                line = p.stdout.readline()
+            except Exception as e:
+                imagelog.error(
+                    'Failed to read compiler output: {}\n{}'.format(
+                        cmd_line, str(e)))
+                raise e
             done = p.poll()
             if line:
                 imagelog.info(line.strip())
             elif done is not None:
                 break
 
+        if p.returncode:
+            imagelog.warning(
+                    'Image compilation {} seems to have failed.'.format(
+                        cmd_line))
         output = None
         for ext in ['.dvi','.pdf','.ps']:
             if os.path.isfile('images'+ext):
@@ -827,8 +837,8 @@ class Imager(object):
 
         # Copy or convert the image as needed
         path = self.newFilename()
-        newext = os.path.splitext(path)[-1]
-        oldext = os.path.splitext(name)[-1]
+        newext = os.path.splitext(path)[-1].lower()
+        oldext = os.path.splitext(name)[-1].lower()
         try:
             directory = os.path.dirname(path)
             if directory and not os.path.isdir(directory):
