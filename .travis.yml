@@ -14,7 +14,9 @@ addons:
     - texlive-binaries
     - texlive-latex-base
     - texlive-latex-extra
-
+    - texlive-extra-utils
+    - imagemagick
+    - texlive-xetex
 
 install:
   - pip install tox-travis
