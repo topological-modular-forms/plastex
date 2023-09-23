@@ -63,19 +63,13 @@ def ProcessOptions(options, document):
 
     def convert(document, content):
         return tikz.tikzConvert(
-                document,
-                content,
-                'tikzcd',
+                document, 
+                content, 
+                'tikzcd', 
                 'Commutative diagram')
 
     cb = PackageResource(
             renderers='html5',
             key='processFileContents',
-            data=convert)
-    document.addPackageResource(cb)
-
-    cb = PackageResource(
-            renderers='gerby',
-            key='processFileContents',
-            data=convert)
+            data=convert) 
     document.addPackageResource(cb)
