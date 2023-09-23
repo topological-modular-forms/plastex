@@ -27,7 +27,7 @@ name: proof
       {% if obj.caption %}
       <strong>{{ obj.caption }}.</strong>
       {% else %}
-      <strong>Proof.</strong>
+      {# <strong>Proof.</strong> #}
       {% endif %}
     {% endif %}
       {{ par }}
