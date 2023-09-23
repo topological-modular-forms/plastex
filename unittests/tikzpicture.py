@@ -1,4 +1,5 @@
 import os
+import shlex
 import subprocess
 from bs4 import BeautifulSoup
 try:
@@ -6,6 +7,7 @@ try:
 except ImportError:
     from mock import Mock
 
+import py.path
 from pytest import mark, fixture
 
 from plasTeX.TeX import TeX, TeXDocument
@@ -65,8 +67,6 @@ def document_cd():
 
 
 def test_tikz_basic_setup(monkeypatch, tmpdir, document):
-    cur_dir = os.getcwd()
-    os.chdir(os.path.dirname(__file__))
     mock_call = Mock()
     mock_move = Mock()
     monkeypatch.setattr('subprocess.call', mock_call)
@@ -75,9 +75,10 @@ def test_tikz_basic_setup(monkeypatch, tmpdir, document):
 
     doc = document()
     tikz_tmpdir = doc.userdata['tikzpicture']['tmp_dir']
-    os.chdir(str(tmpdir))
-    renderer = Renderer()
-    renderer.render(doc)
+
+    with tmpdir.as_cwd():
+        renderer = Renderer()
+        renderer.render(doc)
 
     pics = doc.getElementsByTagName('tikzpicture')
     assert pics
@@ -91,23 +92,23 @@ def test_tikz_basic_setup(monkeypatch, tmpdir, document):
     assert mock_move.called
 
     assert 'TikZ picture' in tmpdir.join('index.html').read()
-    os.chdir(cur_dir)
 
 
 def test_tikz_config_options(monkeypatch, tmpdir, document):
-    cur_dir = os.getcwd()
-    os.chdir(os.path.dirname(__file__))
     mock_call = Mock()
     mock_move = Mock()
     monkeypatch.setattr('subprocess.call', mock_call)
     monkeypatch.setattr('os.remove', Mock)
     monkeypatch.setattr('shutil.move', mock_move)
 
-    doc = document(compiler='xelatex', converter='mockconv', template='tikztemplate')
+    with py.path.local(os.path.dirname(__file__)).as_cwd():
+        doc = document(compiler='xelatex', converter='mockconv', template='tikztemplate')
     tikz_tmpdir = doc.userdata['tikzpicture']['tmp_dir']
-    os.chdir(str(tmpdir))
-    renderer = Renderer()
-    renderer.render(doc)
+
+    with tmpdir.as_cwd():
+        renderer = Renderer()
+        renderer.render(doc)
+
     pics = doc.getElementsByTagName('tikzpicture')
     assert pics
     tex_path = os.path.join(tikz_tmpdir, pics[0].id + '.tex')
@@ -117,11 +118,8 @@ def test_tikz_config_options(monkeypatch, tmpdir, document):
 
     assert 'xelatex' in mock_call.call_args_list[0][0][0]
     assert 'mockconv' in mock_call.call_args_list[1][0][0]
-    os.chdir(cur_dir)
 
 def test_tikzcd_basic_setup(monkeypatch, tmpdir, document_cd):
-    cur_dir = os.getcwd()
-    os.chdir(os.path.dirname(__file__))
     mock_call = Mock()
     mock_move = Mock()
     monkeypatch.setattr('subprocess.call', mock_call)
@@ -130,9 +128,10 @@ def test_tikzcd_basic_setup(monkeypatch, tmpdir, document_cd):
 
     doc = document_cd()
     tikz_tmpdir = doc.userdata['tikzcd']['tmp_dir']
-    os.chdir(str(tmpdir))
-    renderer = Renderer()
-    renderer.render(doc)
+
+    with tmpdir.as_cwd():
+        renderer = Renderer()
+        renderer.render(doc)
 
     pics = doc.getElementsByTagName('tikzcd')
     assert pics
@@ -146,22 +145,22 @@ def test_tikzcd_basic_setup(monkeypatch, tmpdir, document_cd):
     assert mock_move.called
 
     assert 'Commutative diagram' in tmpdir.join('index.html').read()
-    os.chdir(cur_dir)
 
 def test_tikzcd_config_options(monkeypatch, tmpdir, document_cd):
-    cur_dir = os.getcwd()
-    os.chdir(os.path.dirname(__file__))
     mock_sys = Mock()
     mock_move = Mock()
     monkeypatch.setattr('subprocess.call', mock_call)
     monkeypatch.setattr('os.remove', Mock)
     monkeypatch.setattr('shutil.move', mock_move)
 
-    doc = document_cd(compiler='xelatex', converter='mockconv', template='tikzcdtemplate')
+    with py.path.local(os.path.dirname(__file__)).as_cwd():
+        doc = document_cd(compiler='xelatex', converter='mockconv', template='tikzcdtemplate')
     tikz_tmpdir = doc.userdata['tikzcd']['tmp_dir']
-    os.chdir(str(tmpdir))
-    renderer = Renderer()
-    renderer.render(doc)
+
+    with tmpdir.as_cwd():
+        renderer = Renderer()
+        renderer.render(doc)
+
     pics = doc.getElementsByTagName('tikzcd')
     assert pics
     tex_path = os.path.join(tikz_tmpdir, pics[0].id + '.tex')
@@ -171,10 +170,8 @@ def test_tikzcd_config_options(monkeypatch, tmpdir, document_cd):
 
     assert 'xelatex' in mock_call.call_args_list[0][0][0]
     assert 'mockconv' in mock_call.call_args_list[1][0][0]
-    os.chdir(cur_dir)
 
 def test_functional(tmpdir):
-    cur_dir = os.getcwd()
     tmpdir.join('test.tex').write(r"""
     \documentclass{article} 
     \usepackage{tikz, tikz-cd}
@@ -186,14 +183,16 @@ def test_functional(tmpdir):
             A \\rar & B
     \end{tikzcd}
     \end{document}""")
-    os.chdir(str(tmpdir))
-    subprocess.call(
-            ['plastex', '--renderer', 'HTML5', 'test.tex'])
+    commandline = os.environ.get('PLASTEX_COMMANDLINE', 'plastex')
+    commandline = shlex.split(commandline)
+    with tmpdir.as_cwd():
+        subprocess.check_call(commandline + [
+            '--renderer', 'HTML5',
+            'test.tex'
+        ])
     assert os.path.isdir(str(tmpdir.join('test')))
     assert os.path.isfile(str(tmpdir.join('test', 'index.html')))
     soup = BeautifulSoup(tmpdir.join('test', 'index.html').read(), "html.parser")
     svgs = soup.findAll('object')
     for svg in svgs:
             assert os.path.isfile(str(tmpdir.join('test', svg.attrs['data'])))
-
-    os.chdir(cur_dir)

@@ -2,6 +2,7 @@
 
 import os, sys, string, glob, shutil
 import importlib
+import traceback, pdb
 import plasTeX
 from plasTeX.TeX import TeX
 from plasTeX.Config import config
@@ -10,7 +11,7 @@ from plasTeX.Logging import getLogger, updateLogLevels
 
 log = getLogger()
 
-__version__ = '2.0'
+__version__ = '2.1'
 
 def collect_renderer_config(config):
     plastex_dir = os.path.dirname(os.path.realpath(plasTeX.__file__))
@@ -103,7 +104,7 @@ def main(argv):
 
     # Load renderer
     try:
-        exec('from plasTeX.Renderers.%s import Renderer' % rname, globals())
+        rmodule = importlib.import_module('plasTeX.Renderers.'+rname)
     except ImportError as msg:
         log.error('Could not import renderer "%s".  Make sure that it is installed correctly, and can be imported by Python.' % rname)
         sys.exit(1)
@@ -119,9 +120,9 @@ def main(argv):
             f.write(document.toXML())
 
     # Apply renderer
-    Renderer().render(document)
+    rmodule.Renderer().render(document)
 
-    print
+    print()
 
 def info(type, value, tb):
    if hasattr(sys, 'ps1') or not sys.stderr.isatty():
@@ -132,7 +133,7 @@ def info(type, value, tb):
       import traceback, pdb
       # we are NOT in interactive mode, print the exception...
       traceback.print_exception(type, value, tb)
-      print
+      print()
       # ...then start the debugger in post-mortem mode.
       pdb.pm()
 
