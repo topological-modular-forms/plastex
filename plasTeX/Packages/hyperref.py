@@ -107,7 +107,7 @@ class pdfstringdef(Command):
     args = 'macroname:str tex:str'
 
 class texorpdfstring(Command):
-    args = 'tex:str pdf:str'
+    args = 'tex pdf:str'
 
 class pdfstringdefDisableCommands(Command):
     args = 'tex:str'
