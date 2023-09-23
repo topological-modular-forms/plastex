@@ -3,6 +3,7 @@
 from plasTeX import ismacro, macroName
 from plasTeX.Logging import getLogger
 from plasTeX.Tokenizer import Tokenizer, Token, DEFAULT_CATEGORIES, VERBATIM_CATEGORIES
+from plasTeX.Base.TeX.Primitives import relax
 import os
 import configparser
 import re
@@ -28,6 +29,7 @@ class ContextItem(dict):
     def __init__(self, data=None):
         dict.__init__(self, data or {})
         self.categories = None
+        self.lets = {}
         self.obj = None
         self.parent = None
         self.owner = None
@@ -174,9 +176,6 @@ class Context(object):
         # LaTeX counters
         self.counters = Counters()
         self.counters.context = self
-
-        # Tokens aliased by \let
-        self.lets = {}
 
         # Imported packages and their options
         self.packages = {}
@@ -564,7 +563,6 @@ class Context(object):
     def __contains__(self, key):
         return key in self.top
 
-
     def mapMethods(self):
         # Getter methods use the most local context
         self.top = top = self.contexts[-1]
@@ -944,7 +942,7 @@ class Context(object):
         """
         # Macro already exists
         if name in list(self.keys()):
-            if not issubclass(self[name], (plasTeX.NewCommand, plasTeX.Definition)):
+            if not issubclass(self[name], (plasTeX.NewCommand, plasTeX.Definition, relax)):
                 if not issubclass(self[name], plasTeX.TheCounter):
                     return
             macrolog.debug('redefining command "%s"', name)
@@ -1050,6 +1048,14 @@ class Context(object):
         else:
             self.addGlobal(name, newclass)
 
+    def get_let(self, command):
+        for context in reversed(self.contexts):
+            try:
+                return context.lets[command]
+            except KeyError:
+                pass
+        return command
+
     def let(self, dest, source):
         """
         Create a \\let
@@ -1062,7 +1068,10 @@ class Context(object):
             c.let('bgroup', BeginGroup('{'))
 
         """
-        self.lets[dest] = source
+        if source.catcode == Token.CC_ESCAPE:
+            self.top[dest.macroName] = self[source.macroName]
+        else:
+            self.top.lets[dest.macroName] = source
 
     def chardef(self, name, num):
         """
