@@ -1,37 +1,43 @@
 #!/usr/bin/env python
 
 import os
+import subprocess
+from pathlib import Path
 from plasTeX.Imagers import VectorImager as _Imager
+from typing import List, Tuple, Optional
 
 class DVISVGM(_Imager):
     """ Imager that uses dvisvgm """
     fileExtension = '.svg'
-    verification = 'dvisvgm --help'
+    verifications = ['dvisvgm --help', 'latex --help']
     compiler = 'latex'
 
-    def executeConverter(self, output):
+    def executeConverter(self, output: bytes) -> Tuple[int, Optional[List[str]]]:
+        Path('images.dvi').write_bytes(output)
         rc = 0
-        open('images.dvi', 'wb').write(output.read())
-        page = 1
-        while 1:
-            filename = 'img%d.svg' % page
-            rc = os.system('dvisvgm --exact --scale=1.6 --no-fonts --output=%s --page=%d images.dvi' % (filename, page))
+        open('images.dvi', 'wb').write(output)
+        scale = self.config["images"]["scale-factor"]
+        rc = 0
+        for page in range(1, len(self.images) + 1):
+            out = Path('img{}.svg'.format(page))
+
+            rc = subprocess.call([
+                "dvisvgm",
+                "--exact",
+                "--scale={}".format(scale),
+                "--no-fonts",
+                "--output={}".format(out),
+                "--page={}".format(page),
+                "images.dvi"
+            ], stdout=subprocess.DEVNULL)
+
             if rc:
                 break
 
-            # dvisvgm always puts "-<page-number>" on each file.  Get rid of it.
-#            try:
-#                os.rename(glob.glob(filename+'-*')[0], filename)
-#            except IndexError:
-#                break
-
-
-            if not open(filename).read().strip():
-                os.remove(filename)
+            if not out.read_text().strip():
+                out.unlink()
                 break
-            page += 1
-            if page > len(self.images):
-                break
+
         return rc, None
 
 Imager = DVISVGM

@@ -9,6 +9,7 @@ from plasTeX.Filenames import Filenames
 from collections import OrderedDict
 import subprocess
 import shlex
+from typing import List, Tuple, Optional
 
 log = getLogger()
 depthlog = getLogger('render.images.depth')
@@ -424,7 +425,7 @@ class Imager(object):
     compiler = 'latex'
 
     # Verification command to determine if the imager is available
-    verification = ''
+    verification = []
 
     fileExtension = '.png'
 
@@ -521,10 +522,16 @@ class Imager(object):
         if self.verification:
             proc = os.popen(self.verification)
             proc.read()
-            if not proc.close():
-                return True
-            return False
+            return not proc.close()
 
+        if self.verifications:
+            for command in self.verifications:
+                proc = os.popen(command)
+                proc.read()
+                if proc.close():
+                    return False
+
+            return True
         if not self.command.strip():
             return False
 
@@ -581,6 +588,9 @@ class Imager(object):
             os.makedirs(os.path.dirname(self._filecache))
         pickle.dump(self._cache, open(self._filecache,'wb'))
 
+    def getCompiler(self):
+        return self.config['images']['compiler'] or self.compiler
+
     def compileLatex(self, source):
         """
         Compile the LaTeX source
@@ -606,7 +616,8 @@ class Imager(object):
 
         # Run LaTeX
         os.environ['SHELL'] = '/bin/sh'
-        program = self.config['images']['compiler']
+        program = self.getCompiler()
+
         if not program:
             program = self.compiler
 
@@ -636,21 +647,28 @@ class Imager(object):
                         cmd_line))
         output = None
         for ext in ['.dvi','.pdf','.ps']:
-            if os.path.isfile('images'+ext):
-                output = open('images'+ext, 'rb')
+            try:
+                with open('images'+ext, 'rb') as f:
+                    output = open('images'+ext, 'rb').read()
                 break
+            except OSError:
+                # Ignore if file not found
+                pass
 
         # Change back to original working directory
         os.chdir(cwd)
+        if not self.config["images"]["save-file"]:
+            shutil.rmtree(tempdir, True)
 
         return output
 
-    def executeConverter(self, output):
+    def executeConverter(self, output: bytes) -> Tuple[int,Optional[List[str]]]:
         """
         Execute the actual image converter
 
         Arguments:
-        output -- file object pointing to the rendered LaTeX output
+        output -- the content of the rendered LaTeX output, obtained by
+        open(...).read()
 
         Returns:
         two-element tuple.  The first element is the return code of the
@@ -659,7 +677,7 @@ class Imager(object):
         used, you can simply return None.
 
         """
-        open('images.out', 'wb').write(output.read())
+        open('images.out', 'wb').write(output)
         options = ''
         if self._configOptions:
             for opt, value in self._configOptions:
@@ -898,3 +916,6 @@ class VectorImager(Imager):
         Imager.writePreamble(self, document)
 #       self.source.write('\\usepackage{type1ec}\n')
         self.source.write('\\def\\plasTeXregister{}\n')
+
+    def getCompiler(self):
+        return self.config['images']['vector-compiler'] or Imager.getCompiler(self)
