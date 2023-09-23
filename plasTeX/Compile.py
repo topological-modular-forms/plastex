@@ -60,7 +60,7 @@ def run(filename: str, config: ConfigManager):
         rmodule = importlib.import_module('plasTeX.Renderers.'+rname)
     except ImportError as msg:
         log.error('Could not import renderer "%s".  Make sure that it is installed correctly, and can be imported by Python.' % rname)
-        sys.exit(1)
+        raise msg
 
     # Write expanded source file
     #sourcefile = '%s.source' % jobname
@@ -75,4 +75,5 @@ def run(filename: str, config: ConfigManager):
     # Apply renderer
     rmodule.Renderer().render(document)
 
+    os.chdir(cwd)
     print()
