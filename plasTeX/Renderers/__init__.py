@@ -5,7 +5,7 @@ from plasTeX.Filenames import Filenames
 from plasTeX.DOM import Node
 from plasTeX.Logging import getLogger
 from plasTeX.Imagers import Image, PILImage
-import collections
+import collections.abc
 
 log = getLogger()
 status = getLogger('status')
