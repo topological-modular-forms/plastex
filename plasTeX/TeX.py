@@ -29,8 +29,6 @@ __all__ = ['TeX']
 
 log = getLogger()
 status = getLogger('status')
-tokenlog = getLogger('parse.tokens')
-digestlog = getLogger('parse.digest')
 _type = type
 
 class bufferediter(object):
@@ -170,7 +168,11 @@ class TeX(object):
 
         """
         if self.inputs:
-            self.inputs.pop()
+            old_input = self.inputs.pop()
+            try:
+                old_input.source.close()
+            except AttributeError:
+                pass
         if self.inputs:
             self.currentInput = self.inputs[-1]
 
@@ -272,31 +274,6 @@ class TeX(object):
             except StopIteration:
                 endInput()
 
-            # This really shouldn't happen, but just in case...
-            except IndexError:
-                break
-
-    def iterchars(self):
-        """
-        Iterate over input characters (untokenized)
-
-        Returns:
-        generator that iterates through the untokenized characters
-
-        """
-        # Create locals before going into generator loop
-        inputs = self.inputs
-        context = self.ownerDocument.context
-        endInput = self.endInput
-        ownerDocument = self.ownerDocument
-
-        while inputs:
-            # Walk through characters
-            try:
-                for char in inputs[-1][0].iterchars():
-                    yield char
-                else:
-                    endInput()
             # This really shouldn't happen, but just in case...
             except IndexError:
                 break

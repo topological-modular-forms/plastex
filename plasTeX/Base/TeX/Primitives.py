@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import datetime
+from datetime import datetime
 from plasTeX.Tokenizer import Token, EscapeSequence, Other
-from plasTeX import Command, CountCommand
+from plasTeX import Macro, Command, CountCommand
 from plasTeX import sourceChildren
 from plasTeX.Logging import getLogger
 
@@ -10,7 +10,6 @@ from plasTeX.Logging import getLogger
 log = getLogger()
 status = getLogger('status')
 deflog = getLogger('parse.definitions')
-envlog = getLogger('parse.environments')
 mathshiftlog = getLogger('parse.mathshift')
 
 class relax(Command):
@@ -157,7 +156,14 @@ class DefCommand(Command):
                         newarg.append(t)
                         params = 0
                 a[key] = newarg
-        self.ownerDocument.context.newdef(a['name'], a['args'], a['definition'], local=self.local)
+
+        # nodeName works for both EscapeSequence and Macro. We can end up with
+        # a macro in the name position if we used \expandafter, e.g.
+        # \expandafter\def\csname foo\endcsname. This works even in the case
+        # where \foo is not yet defined, and becomes an unrecognized macro.
+        name = a['name'].nodeName
+
+        self.ownerDocument.context.newdef(name, a['args'], a['definition'], local=self.local)
 
 class def_(DefCommand):
     macroName = 'def'
@@ -197,7 +203,7 @@ class ifnum(IfCommand):
     def invoke(self, tex):
         self.parse(tex)
         attrs = self.attributes
-        attrs['b'] = tex.readNumber(optspace=False)
+        attrs['b'] = tex.readNumber()
         relation = attrs['rel']
         a, b = attrs['a'], attrs['b']
         if relation == '<':
@@ -233,13 +239,7 @@ class ifdim(IfCommand):
 class ifodd(IfCommand):
     """ Test for odd integer """
     def invoke(self, tex):
-        tex.processIfContent(bool(tex.readNumber(optspace=False) % 2))
-        return []
-
-class ifeven(IfCommand):
-    """ Test for even integer """
-    def invoke(self, tex):
-        tex.processIfContent(not(tex.readNumber(optspace=False) % 2))
+        tex.processIfContent(bool(tex.readNumber() % 2))
         return []
 
 class ifvmode(IfCommand):
@@ -287,28 +287,28 @@ class ifx(IfCommand):
 class ifvoid(IfCommand):
     """ Test a box register """
     def invoke(self, tex):
-        tex.readNumber(optspace=False)
+        tex.readNumber()
         tex.processIfContent(False)
         return []
 
 class ifhbox(IfCommand):
     """ Test a box register """
     def invoke(self, tex):
-        tex.readNumber(optspace=False)
+        tex.readNumber()
         tex.processIfContent(False)
         return []
 
 class ifvbox(IfCommand):
     """ Test a box register """
     def invoke(self, tex):
-        tex.readNumber(optspace=False)
+        tex.readNumber()
         tex.processIfContent(False)
         return []
 
 class ifeof(IfCommand):
     """ Test for end of file """
     def invoke(self, tex):
-        tex.readNumber(optspace=False)
+        tex.readNumber()
         tex.processIfContent(False)
         return []
 
@@ -340,7 +340,7 @@ class pdftrue(Command): pass
 class ifcase(IfCommand):
     """ Cases """
     def invoke(self, tex):
-        tex.processIfContent(tex.readNumber(optspace=False))
+        tex.processIfContent(tex.readNumber())
         return []
 
 
@@ -373,10 +373,6 @@ class NameDef(Command):
     macroName = '@namedef'
     args = 'name:str value:nox'
 
-class makeatletter(Command):
-    def invoke(self, tex):
-        self.ownerDocument.context.catcode('@', Token.CC_LETTER)
-
 class everypar(Command):
     args = 'tokens:nox'
 
@@ -386,10 +382,10 @@ class catcode(Command):
     def invoke(self, tex):
         a = self.parse(tex)
         self.ownerDocument.context.catcode(chr(a['char']), a['code'])
+    @property
     def source(self):
         return r'\catcode`%s=%s' % (chr(self.attributes['char']),
                                      self.attributes['code'])
-    source = property(source)
 
 class csname(Command):
     """ \\csname """
@@ -413,8 +409,7 @@ class input(Command):
             path = tex.kpsewhich(a['name'])
             status.info(' ( %s ' % path)
             encoding = self.config['files']['input-encoding']
-            with open(path, encoding=encoding) as f:
-                tex.input(f.read())
+            tex.input(open(path, encoding=encoding))
             status.info(' ) ')
 
         except (OSError, IOError) as msg:
@@ -468,16 +463,22 @@ class noligs_(Command):
 
 class expandafter(Command):
     def invoke(self, tex):
-        nexttok = None
-        for tok in tex.itertokens():
-            nextok = tok
-            break
-        for tok in tex:
-            aftertok = tok
-            break
-        tex.pushToken(aftertok)
-        tex.pushToken(nexttok)
-        return []
+        nexttok = next(tex.itertokens())
+        aftertok = next(tex.itertokens())
+
+        # We expand aftertok once, not recursively
+        expanded = None
+        if isinstance(aftertok, EscapeSequence):
+            obj = tex.ownerDocument.createElement(aftertok.macroName)
+            obj.contextDepth = aftertok.contextDepth
+            obj.parentNode = aftertok.parentNode
+            aftertok = obj
+        if isinstance(aftertok, Macro):
+            expanded = aftertok.invoke(tex)
+
+        expanded = expanded or [aftertok]
+
+        return [nexttok] + expanded
 
 class vskip(Command):
     args = 'size:Dimen'
@@ -522,9 +523,9 @@ class the(Command):
         result = Command.invoke(self, tex) 
         name = self.attributes['arg']
         if name == 'year':
-            return [Other(datetime.datetime.now().strftime('%Y'))]
+            return [Other(datetime.now().strftime('%Y'))]
         elif name == 'month':
-            return [Other(datetime.datetime.now().strftime('%-m'))]
+            return [Other(datetime.now().strftime('%-m'))]
         elif name == 'day':
-            return [Other(datetime.datetime.now().strftime('%-d'))]
+            return [Other(datetime.now().strftime('%-d'))]
         return [Other('???')]

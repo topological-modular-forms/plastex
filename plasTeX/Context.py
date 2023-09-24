@@ -205,20 +205,22 @@ class Context(object):
         if load:
             self.loadBaseMacros()
 
-    def currenvir():
-        def fget(self):
-            if self._currenvir:
-                return self._currenvir[-1]
-            return
-        def fset(self, value):
-            if value is None:
-                self._currenvir.pop()
-            else:
-                self._currenvir.append(value)
-        def fdel(self):
+    @property
+    def currenvir(self):
+        if self._currenvir:
+            return self._currenvir[-1]
+        return
+
+    @currenvir.setter
+    def currenvir(self, value):
+        if value is None:
             self._currenvir.pop()
-        return locals()
-    currenvir = property(**currenvir())
+        else:
+            self._currenvir.append(value)
+
+    @currenvir.deleter
+    def currenvir(self):
+        self._currenvir.pop()
 
     def persist(self, filename, rtype='none'):
         """
@@ -782,7 +784,7 @@ class Context(object):
         """
         self.contexts[-1].categories = self.categories = VERBATIM_CATEGORIES[:]
 
-    def newcounter(self, name, resetby=None, initial=0, format=None):
+    def newcounter(self, name, resetby=None, initial=0, format=None, trimLeft= False):
         """
         Create a new counter
 
@@ -806,8 +808,7 @@ class Context(object):
 
         if format is None:
             format = '${%s}' % name
-        newclass = type('the' + name, (plasTeX.TheCounter,),
-                               {'format': format})
+        newclass = type('the' + name, (plasTeX.TheCounter,), {'format': format, 'trimLeft': trimLeft})
         self.addGlobal('the' + name, newclass)
 
     def newwrite(self, name, file):
@@ -942,7 +943,7 @@ class Context(object):
         """
         # Macro already exists
         if name in list(self.keys()):
-            if not issubclass(self[name], (plasTeX.NewCommand, plasTeX.Definition, relax)):
+            if not issubclass(self[name], (plasTeX.NewCommand, plasTeX.UnrecognizedMacro, plasTeX.Definition, relax)):
                 if not issubclass(self[name], plasTeX.TheCounter):
                     return
             macrolog.debug('redefining command "%s"', name)
@@ -1068,10 +1069,13 @@ class Context(object):
             c.let('bgroup', BeginGroup('{'))
 
         """
+        # Use nodeName instead of macroName to work with Macros as well as
+        # EscapeSequence, e.g. when we do
+        # \expandafter\let\csname foo\endcsname=1
         if source.catcode == Token.CC_ESCAPE:
-            self.top[dest.macroName] = self[source.macroName]
+            self.top[dest.nodeName] = self[source.nodeName]
         else:
-            self.top.lets[dest.macroName] = source
+            self.top.lets[dest.nodeName] = source
 
     def chardef(self, name, num):
         """

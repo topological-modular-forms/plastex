@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-import os
 import subprocess
 from pathlib import Path
 from plasTeX.Imagers import VectorImager as _Imager
@@ -12,32 +9,29 @@ class DVISVGM(_Imager):
     verifications = ['dvisvgm --help', 'latex --help']
     compiler = 'latex'
 
-    def executeConverter(self, output: bytes) -> Tuple[int, Optional[List[str]]]:
-        Path('images.dvi').write_bytes(output)
-        rc = 0
-        open('images.dvi', 'wb').write(output)
-        scale = self.config["images"]["scale-factor"]
-        rc = 0
-        for page in range(1, len(self.images) + 1):
-            out = Path('img{}.svg'.format(page))
+    def executeConverter(self, outfile=None) -> List[Tuple[str, str]]:
+        if outfile is None:
+            outfile = self.tmpFile.with_suffix('.dvi').name
 
-            rc = subprocess.call([
+        default_scale = self.config["images"]["scale-factor"]
+
+        images = []
+        for no, line in enumerate(open("images.csv")):
+            out = 'img%d.svg' % no
+            page, output, scale_str = line.split(",")
+            scale = float(scale_str.strip()) or default_scale
+            images.append((out, output.rstrip()))
+
+            rc = subprocess.run([
                 "dvisvgm",
                 "--exact",
                 "--scale={}".format(scale),
                 "--no-fonts",
                 "--output={}".format(out),
                 "--page={}".format(page),
-                "images.dvi"
-            ], stdout=subprocess.DEVNULL)
+                outfile
+            ], stdout=subprocess.DEVNULL, check=True)
 
-            if rc:
-                break
-
-            if not out.read_text().strip():
-                out.unlink()
-                break
-
-        return rc, None
+        return images
 
 Imager = DVISVGM

@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 import sys, re
-from plasTeX.Logging import getLogger
+import builtins
+from typing import Optional, NewType
+
+NodeType = NewType("NodeType", int)
 
 class DOMString(str):
     """
@@ -159,10 +162,9 @@ class ValidationErr(DOMException):
 class _DOMList(list):
     """ Generic List """
 
-    def length():
-        def fget(self): return len(self)
-        return locals()
-    length = property(**length())
+    @property
+    def length(self):
+        return len(self)
 
     def item(self, i):
         try: return self[i]
@@ -250,7 +252,8 @@ class NamedNodeMap(dict):
 
     """
 
-    def parentNode():
+    @property
+    def parentNode(self):
         """
         Get/Set the parent node
 
@@ -259,15 +262,14 @@ class NamedNodeMap(dict):
         our children.
 
         """
-        def fget(self):
-            return getattr(self, '_dom_parentNode', None)
-        def fset(self, value):
-            if getattr(self, '_dom_parentNode', None) is not value:
-                self._dom_parentNode = value
-                for value in list(self.values()):
-                    self._resetPosition(value.parentNode)
-        return locals()
-    parentNode = property(**parentNode())
+        return getattr(self, '_dom_parentNode', None)
+
+    @parentNode.setter
+    def parentNode(self, value):
+        if getattr(self, '_dom_parentNode', None) is not value:
+            self._dom_parentNode = value
+            for value in list(self.values()):
+                self._resetPosition(value.parentNode)
 
     @property
     def ownerDocument(self):
@@ -588,18 +590,19 @@ class Node(object):
 # End LaTeX Node extensions
 #
 
-    ELEMENT_NODE = 1
-    ATTRIBUTE_NODE = 2
-    TEXT_NODE = 3
-    CDATA_SECTION_NODE = 4
-    ENTITY_REFERENCE_NODE = 5
-    ENTITY_NODE = 6
-    PROCESSING_INSTRUCTION_NODE = 7
-    COMMENT_NODE = 8
-    DOCUMENT_NODE = 9
-    DOCUMENT_TYPE_NODE = 10
-    DOCUMENT_FRAGMENT_NODE = 11
-    NOTATION_NODE = 12
+    ELEMENT_NODE = NodeType(1)
+    ATTRIBUTE_NODE = NodeType(2)
+    TEXT_NODE = NodeType(3)
+    CDATA_SECTION_NODE = NodeType(4)
+    ENTITY_REFERENCE_NODE = NodeType(5)
+    ENTITY_NODE = NodeType(6)
+    PROCESSING_INSTRUCTION_NODE = NodeType(7)
+    COMMENT_NODE = NodeType(8)
+    DOCUMENT_NODE = NodeType(9)
+    DOCUMENT_TYPE_NODE = NodeType(10)
+    DOCUMENT_FRAGMENT_NODE = NodeType(11)
+    NOTATION_NODE = NodeType(12)
+
 
     DOCUMENT_POSITION_DISCONNECTED = 0x01
     DOCUMENT_POSITION_PRECEDING = 0x02
@@ -1394,18 +1397,21 @@ class Attr(Node):
     def __repr__(self):
         return '<%s attribute at 0x%s>' % (self.nodeName, id(self))
 
-    def nodeName():
-        def fget(self): return self.name
-        def fset(self, value): self.name = value
-        return locals()
-    nodeName = property(**nodeName())
+    @property
+    def nodeName(self) -> Optional[str]:
+        return self.name
 
-    def nodeValue():
-        def fget(self): return self.value
-        def fset(self, value): self.value = value
-        return locals()
-    nodeValue = property(**nodeValue())
+    @nodeName.setter
+    def nodeName(self, value):
+        self.name = value
 
+    @property
+    def nodeValue(self):
+        return self.value
+
+    @nodeValue.setter
+    def nodeValue(self, value):
+        self.value = value
 
 class Element(Node):
     """
@@ -1430,11 +1436,13 @@ class Element(Node):
         self._dom_attributes = nnm
         return nnm
 
-    def tagName():
-        def fget(self): return self.nodeName
-        def fset(self, value): self.nodeName = value
-        return locals()
-    tagName = property(**tagName())
+    @property
+    def tagName(self):
+        return self.nodeName
+
+    @tagName.setter
+    def tagName(self, value):
+        self.nodeName = value
 
     def getAttribute(self, name):
         """
@@ -1748,18 +1756,6 @@ class Text(CharacterData):
         """ Return text from siblings and self """
         return self.parentNode.textContent
 
-
-class Comment(CharacterData):
-    """
-    Comment
-
-    http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-1728279322
-    """
-    nodeName = '#comment'
-    nodeType = Node.COMMENT_NODE
-    __slots__ = Node.TEXT_SLOTS
-
-
 class TypeInfo(object):
     """
     Type Info
@@ -1944,12 +1940,13 @@ class DocumentType(Node):
     systemId = None
     internalSubset = None
 
-    def nodeName():
-        def fget(self): return self.name
-        def fset(self, value): self.name = value
-        return locals()
-    nodeName = property(**nodeName())
+    @property
+    def nodeName(self):
+        return self.name
 
+    @nodeName.setter
+    def nodeName(self, value):
+        self.name = value
 
 class Notation(Node):
     """
@@ -2003,18 +2000,21 @@ class ProcessingInstruction(Node):
     target = None
     data = None
 
-    def nodeName():
-        def fget(self): return self.target
-        def fset(self, value): self.target = value
-        return locals()
-    nodeName = property(**nodeName())
+    @property
+    def nodeName(self):
+        return self.target
 
-    def nodeValue():
-        def fget(self): return self.data
-        def fset(self, value): self.data = value
-        return locals()
-    nodeValue = property(**nodeValue())
+    @nodeName.setter
+    def nodeName(self, value):
+        self.target = value
 
+    @property
+    def nodeValue(self):
+        return self.data
+
+    @nodeName.setter
+    def nodeValue(self, value):
+        self.data = value
 
 class Document(Node):
     """
@@ -2027,7 +2027,6 @@ class Document(Node):
     elementClass = Element
     documentFragmentClass = DocumentFragment
     textNodeClass = Text
-    commentClass = Comment
     cdataSectionClass = CDATASection
     processingInstructionClass = ProcessingInstruction
     attributeClass = Attr

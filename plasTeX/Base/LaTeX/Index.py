@@ -11,6 +11,7 @@ from plasTeX import Command, Environment, IgnoreCommand, encoding
 from plasTeX.Logging import getLogger
 from plasTeX.Base.LaTeX.Sectioning import SectionUtils
 
+from typing import Optional
 
 log = getLogger()
 

@@ -14,7 +14,6 @@ sys.path.append(os.path.dirname(Packages.__file__))
 del Packages
 
 log = getLogger()
-status = getLogger('status')
 
 class PackageLoader(Command):
     extension = '.sty'
@@ -56,9 +55,6 @@ class columnsep(DimenCommand):
     value = DimenCommand.new(0)
 
 class columnseprule(DimenCommand):
-    value = DimenCommand.new(0)
-
-class mathindent(DimenCommand):
     value = DimenCommand.new(0)
 
 #

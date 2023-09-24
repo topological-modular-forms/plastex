@@ -9,7 +9,6 @@ class LTleft(GlueCommand): value = glue('1fil')
 class LTright(GlueCommand): value = glue('1fil')
 class LTpre(GlueCommand): value = glue('1fil')
 class LTpost(GlueCommand): value = glue('1fil')
-class LTchunksize(DimenCommand): value = dimen('4in')
 class LTchunksize(CountCommand): value = count(20)
 
 class setlongtables(Command): pass
@@ -41,7 +40,7 @@ class longtable(tabular):
     class tabularnewline(Command): pass
 
     class LongTableEndRow(tabular.EndRow):
-        args = None
+        args = ''
         macroName = None
         digested = False
         def digest(self, tokens):

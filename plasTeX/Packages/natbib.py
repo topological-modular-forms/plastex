@@ -11,10 +11,8 @@ TODO:
 
 """
 
-import plasTeX, re, string
+import re, string
 from plasTeX import Base, Text
-
-log = plasTeX.Logging.getLogger()
 
 PackageOptions = {}
 
@@ -199,13 +197,13 @@ class thebibliography(Base.thebibliography):
                 value.attributes[item] = obj
             return value
             
-        def ref():
-            def fset(self, value):
-                pass
-            def fget(self):
-                return self.bibcite.textContent
-            return locals()
-        ref = property(**ref())
+        @property
+        def ref(self):
+            return self.bibcite.textContent
+
+        @ref.setter
+        def ref(self, value):
+            pass
     
 class harvarditem(thebibliography.bibitem):
     args = '[ abbrlabel ] label year key:str'
@@ -493,7 +491,7 @@ class citet(NatBibCite):
                     res.append(bibpunct.punctuation['close'])
         return res
 
-    def numcitation(self, full=False, capitalize=False):
+    def numcitation(self):
         """ (1, 2) """
         element = self.ownerDocument.createElement
         orig = res = self.ownerDocument.createDocumentFragment()

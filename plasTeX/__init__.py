@@ -2,6 +2,7 @@
 
 __version__ = '2.1'
 
+from typing import Optional, Union
 from plasTeX import Logging, encoding
 from plasTeX.DOM import Element, Text, Node, DocumentFragment, Document
 from plasTeX.Tokenizer import Token, BeginGroup, EndGroup, Other
@@ -143,6 +144,15 @@ class Macro(Element):
     # Force there to be at least on paragraph in the content
     forcePars = False
 
+    # Macros do not have but we give EscapeSequence a catcode of 0 so I guess
+    # we should follow suit... Normally commands only check the catcode of
+    # unexpanded tokens from the tokenizer, which all have the right catcode
+    # set. This is done by assuming that tokens further down the token stream
+    # have not been expanded. There are corner cases where this assumption is
+    # not true, and causes some code to crash, e.g. when \expandafter is used.
+    # So we set the catcode to ensure correct behaviour.
+    catcode = 0
+
     # Whether or not to perform character substitutions
     doCharSubs = True
 
@@ -198,93 +208,92 @@ class Macro(Element):
         setattr(self, '@idref', d)
         return d
 
-    def captionName():
+    @property
+    def captionName(self):
         """ Name associated with the counter """
-        def fget(self):
-            if hasattr(self, '@captionName'):
-                return getattr(self, '@captionName')
-            self.captionName = name = self.ownerDocument.createTextNode('')
-            return name
-        def fset(self, value):
-            setattr(self, '@captionName', value)
-        return locals()
-    captionName = property(**captionName())
+        if hasattr(self, '@captionName'):
+            return getattr(self, '@captionName')
+        self.captionName = name = self.ownerDocument.createTextNode('')
+        return name
 
-    def title():
+    @captionName.setter
+    def captionName(self, value):
+        setattr(self, '@captionName', value)
+
+    @property
+    def title(self):
         """ Retrieve title from variable or attributes dictionary """
-        def fget(self):
+        try:
+            return getattr(self, '@title')
+        except AttributeError:
             try:
-                return getattr(self, '@title')
-            except AttributeError:
-                try:
-                    return self.attributes['title']
-                except KeyError:
-                    pass
-            raise AttributeError('could not find attribute "title"')
-        def fset(self, value):
-            setattr(self, '@title', value)
-        return locals()
-    title = property(**title())
+                return self.attributes['title']
+            except KeyError:
+                pass
+        raise AttributeError('could not find attribute "title"')
 
-    def fullTitle():
+    @title.setter
+    def title(self, value):
+        setattr(self, '@title', value)
+
+    @property
+    def fullTitle(self):
         """ Retrieve title including the section number """
-        def fget(self):
+        try:
+            return getattr(self, '@fullTitle')
+        except AttributeError:
+            if self.ref is not None:
+                fullTitle = self.ownerDocument.createDocumentFragment()
+                fullTitle.extend([self.ref, ' ', self.title], setParent=False)
+            else:
+                fullTitle = self.title
+            setattr(self, '@fullTitle', fullTitle)
+            return fullTitle
+
+    @fullTitle.setter
+    def fullTitle(self, value):
+        setattr(self, '@fullTitle', value)
+
+    @property
+    def tocEntry(self):
+        """ Retrieve table of contents entry """
+        try:
+            return getattr(self, '@tocEntry')
+        except AttributeError:
             try:
-                return getattr(self, '@fullTitle')
+                if 'toc' in list(self.attributes.keys()):
+                    toc = self.attributes['toc']
+                    if toc is None:
+                        toc = self.title
+                    setattr(self, '@tocEntry', toc)
+                    return toc
+            except (KeyError, AttributeError):
+                pass
+        return self.title
+
+    @tocEntry.setter
+    def tocEntry(self, value):
+        setattr(self, '@tocEntry', value)
+
+    @property
+    def fullTocEntry(self):
+        """ Retrieve title including the section number """
+        try:
+            try:
+                return getattr(self, '@fullTocEntry')
             except AttributeError:
                 if self.ref is not None:
-                    fullTitle = self.ownerDocument.createDocumentFragment()
-                    fullTitle.extend([self.ref, ' ', self.title], setParent=False)
+                    fullTocEntry = self.ownerDocument.createDocumentFragment()
+                    fullTocEntry.extend([self.ref, ' ', self.tocEntry], setParent=False)
                 else:
-                    fullTitle = self.title
-                setattr(self, '@fullTitle', fullTitle)
-                return fullTitle
-        def fset(self, value):
-            setattr(self, '@fullTitle', value)
-        return locals()
-    fullTitle = property(**fullTitle())
-
-    def tocEntry():
-        """ Retrieve table of contents entry """
-        def fget(self):
-            try:
-                return getattr(self, '@tocEntry')
-            except AttributeError:
-                try:
-                    if 'toc' in list(self.attributes.keys()):
-                        toc = self.attributes['toc']
-                        if toc is None:
-                            toc = self.title
-                        setattr(self, '@tocEntry', toc)
-                        return toc
-                except (KeyError, AttributeError):
-                    pass
+                    fullTocEntry = self.tocEntry
+                setattr(self, '@fullTocEntry', fullTocEntry)
+                return fullTocEntry
+        except Exception as msg:
             return self.title
-        def fset(self, value):
-            setattr(self, '@tocEntry', value)
-        return locals()
-    tocEntry = property(**tocEntry())
-
-    def fullTocEntry():
-        """ Retrieve title including the section number """
-        def fget(self):
-            try:
-                try:
-                    return getattr(self, '@fullTocEntry')
-                except AttributeError:
-                    if self.ref is not None:
-                        fullTocEntry = self.ownerDocument.createDocumentFragment()
-                        fullTocEntry.extend([self.ref, ' ', self.tocEntry], setParent=False)
-                    else:
-                        fullTocEntry = self.tocEntry
-                    setattr(self, '@fullTocEntry', fullTocEntry)
-                    return fullTocEntry
-            except Exception as msg:
-                return self.title
-        def fset(self, value):
-            setattr(self, '@fullTocEntry', value)
-        return locals()
-    fullTocEntry = property(**fullTocEntry())
+    @fullTocEntry.setter
+    def fullTocEntry(self, value):
+        setattr(self, '@fullTocEntry', value)
 
     @property
     def style(self):
@@ -319,22 +328,22 @@ class Macro(Element):
         setattr(tself, localsname, loc)
         return loc
 
-    def id():
-        def fset(self, value):
-            if value:
-                setattr(self, '@id', value)
-            else:
-                delattr(self, '@id')
-        def fget(self):
-            id = getattr(self, '@id', None)
-            if id is None:
-                for id in idgen:
-                    setattr(self, '@hasgenid', True)
-                    self.id = id
-                    break
-            return id
-        return locals()
-    id = property(**id())
+    @property
+    def id(self):
+        id = getattr(self, '@id', None)
+        if id is None:
+            for id in idgen:
+                setattr(self, '@hasgenid', True)
+                self.id = id
+                break
+        return id
+
+    @id.setter
+    def id(self, value):
+        if value:
+            setattr(self, '@id', value)
+        else:
+            delattr(self, '@id')
 
     def expand(self, tex):
         """ Fully expand the macro """
@@ -394,6 +403,11 @@ class Macro(Element):
         if t.macroName is None:
             return t.__name__
         return t.macroName
+
+    @tagName.setter
+    def tagName(self, value):
+        self.macroName = value
+
     nodeName = tagName
 
     @property
@@ -425,7 +439,7 @@ class Macro(Element):
         if not argSource:
             argSource = ' '
         elif argSource[0] in encoding.stringletters() and\
-             not (len(self.macroName) == 1 and self.macroName[0] not in encoding.stringletters()):
+             not (len(name) == 1 and name[0] not in encoding.stringletters()):
             argSource = ' %s' % argSource
         s = '%s%s%s' % (escape, name, argSource)
 
@@ -792,23 +806,16 @@ class TeXFragment(DocumentFragment):
 class TeXDocument(Document):
     """ TeX Document node """
     documentFragmentClass = TeXFragment
-    charsubs = [
-        ('``', chr(8220)),
-        ("''", chr(8221)),
-        ('"`', chr(8222)),
-        ('"\'', chr(8220)),
-        ('`', chr(8216)),
-        ('---', chr(8212)),
-        ('--', chr(8211)),
-#       ('fj', unichr(58290)),
-#       ('ff', unichr(64256)),
-#       ('fi', unichr(64257)),
-#       ('fl', unichr(64258)),
-#       ('ffi',unichr(64259)),
-#       ('ffl',unichr(64260)),
-#       ('ij', unichr(307)),
-#       ('IJ', unichr(308)),
-    ]
+    defaultCharsubs = [
+            ('``', chr(8220)),
+            ("''", chr(8221)),
+            ('"`', chr(8222)),
+            ('"\'', chr(8220)),
+            ('`', chr(8216)),
+            ("'", chr(8217)),
+            ('---', chr(8212)),
+            ('--', chr(8211)),
+        ]
 
     def __init__(self, *args, **kwargs):
         # super(TeXDocument, self).__init__(*args, **kwargs)
@@ -830,6 +837,8 @@ class TeXDocument(Document):
 
         self.packageResources = []
         self.rendererdata = dict()
+
+        self.charsubs = [x for x in TeXDocument.defaultCharsubs if x[0] not in self.config["document"]["disable-charsub"].split(",")]
 
     def addPackageResource(self, resource):
         """
@@ -1147,7 +1156,7 @@ class NewCommand(Macro):
 
 class Definition(Macro):
     """ Superclass for all \\def-type commands """
-    args = None
+    args = ''
     definition = None
 
     def invoke(self, tex):
@@ -1516,6 +1525,46 @@ class MuGlueCommand(RegisterCommand):
     def new(cls, *args, **kwargs):
         return muglue(*args, **kwargs)
 
+def numToRoman(x: int) -> str:
+    n, number = divmod(x, 1000)
+    roman = "M"*n
+    if number >= 900:
+        roman = roman + "CM"
+        number = number - 900
+    while number >= 500:
+        roman = roman + "D"
+        number = number - 500
+    if number >= 400:
+        roman = roman + "CD"
+        number = number - 400
+    while number >= 100:
+        roman = roman + "C"
+        number = number - 100
+    if number >= 90:
+        roman = roman + "XC"
+        number = number - 90
+    while number >= 50:
+        roman = roman + "L"
+        number = number - 50
+    if number >= 40:
+        roman = roman + "XL"
+        number = number - 40
+    while number >= 10:
+        roman = roman + "X"
+        number = number - 10
+    if number >= 9:
+        roman = roman + "IX"
+        number = number - 9
+    while number >= 5:
+        roman = roman + "V"
+        number = number - 5
+    if number >= 4:
+        roman = roman + "IV"
+        number = number - 4
+    while number > 0:
+        roman = roman + "I"
+        number = number - 1
+    return roman
 
 class Counter(object):
     """
@@ -1558,46 +1607,7 @@ class Counter(object):
 
     @property
     def Roman(self):
-        roman = ""
-        n, number = divmod(self.value, 1000)
-        roman = "M"*n
-        if number >= 900:
-            roman = roman + "CM"
-            number = number - 900
-        while number >= 500:
-            roman = roman + "D"
-            number = number - 500
-        if number >= 400:
-            roman = roman + "CD"
-            number = number - 400
-        while number >= 100:
-            roman = roman + "C"
-            number = number - 100
-        if number >= 90:
-            roman = roman + "XC"
-            number = number - 90
-        while number >= 50:
-            roman = roman + "L"
-            number = number - 50
-        if number >= 40:
-            roman = roman + "XL"
-            number = number - 40
-        while number >= 10:
-            roman = roman + "X"
-            number = number - 10
-        if number >= 9:
-            roman = roman + "IX"
-            number = number - 9
-        while number >= 5:
-            roman = roman + "V"
-            number = number - 5
-        if number >= 4:
-            roman = roman + "IV"
-            number = number - 4
-        while number > 0:
-            roman = roman + "I"
-            number = number - 1
-        return roman
+        return numToRoman(self.value)
 
     @property
     def roman(self):
@@ -1619,6 +1629,7 @@ class Counter(object):
 class TheCounter(Command):
     """ Base class for \\thecounter commands """
     format = None
+    trimLeft = False
 
     def invoke(self, tex):
 
@@ -1643,11 +1654,12 @@ class TheCounter(Command):
 
         t = re.sub(r'\$\{\s*(\w+)(?:\.(\w+))?\s*\}', counterValue, format)
 
-        # This is kind of a hack.  Since number formats aren't quite as
-        # flexible as in LaTeX, we have to do somethings heuristically.
-        # In this case, whenever a counter value comes out as a zero,
-        # just hank it out.  This is especially useful in document classes
-        # such as book and report which do this in the \thefigure format macro.
+        # If trimLeft is set to True, we remove any "0." at the beginning.
+        # Document classes such as book and report which do this in the
+        # \thefigure format macro.
+        if self.trimLeft:
+            while t.startswith("0."):
+                t = t[2:]
 
         # REMARK: disabled this for Gerby
         #t = re.sub(r'\b0[^\dA-Za-z]+', r'', t)

@@ -61,7 +61,6 @@ class CompoundParser:
 
       return value, args
 
-
 class CompoundOption(CompoundParser, StringOption):
    """
    Compound configuration option
@@ -98,6 +97,11 @@ class CompoundOption(CompoundParser, StringOption):
          self.data = self.REGEX.sub(r'\1\2 %s \3' % other, self.data)
 
       return self
+
+   def __add__(self, other):
+      new = self.deepcopy()
+      new += other
+      return new
 
 class CompoundArgument(GenericArgument, CompoundOption):
    """ Compound command-line argument """
