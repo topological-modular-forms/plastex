@@ -32,7 +32,7 @@ name: proof
     {% endif %}
       {{ par }}
     {% if loop.last %}
-      <span class="qed"><img src="/static/images/trans-flag.svg" width="17px"></span>
+      <span class="qed"><img src="/static/images/trans-flag.svg" width="16px"></span>
     </p>
     {% endif %}
   {% endfor %}
