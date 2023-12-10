@@ -45,3 +45,6 @@ name: qquad
 
 name: thinspace /
 comment: &#8201;
+
+name: textcolor
+<span class="{{ obj.attributes.color }}">{{ obj }}</span>

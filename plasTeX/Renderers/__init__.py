@@ -327,6 +327,7 @@ class Renderable(object):
                     ref = self.ref
                 if ref:
                     ns['ref'] = ref
+                    print(ref)
             if self.nodeName:
                 ns['name'] = self.nodeName
             r.files[self] = filename = r.newFilename()
