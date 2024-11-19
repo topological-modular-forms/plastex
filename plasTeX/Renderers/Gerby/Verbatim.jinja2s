@@ -1,5 +1,5 @@
 name: verbatim
-<pre><code>{{ obj }}</code></pre>
+<div class="code-container"><pre class="code-block language-latex"><code>{{ obj }}</code></pre><button class="copy-button" onclick="copyCode()">Copy</button></div>
 
 name: verb
 <code>{{ obj }}</code>
